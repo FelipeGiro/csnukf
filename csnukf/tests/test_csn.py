@@ -16,6 +16,16 @@ class TestCSN1D(unittest.TestCase):
             Delta_z = np.array([[ 3.0]])
         )
 
+        self.params1Dz_dict = {
+            "mu_z" : np.array([[ 3.0]]),
+            "nu_z" : np.array([[ 4.0]]),
+            "Sigma_z" : np.array([[ 2.0]]),
+            "Gamma_z" : np.array([[-5.0]]),
+            "Delta_z" : np.array([[ 3.0]]),
+            "n" : 1,
+            "q" : 1
+        }
+
     def test_conversion_00(self):
         
         mu_z_0 = np.array([[ 3.0]])
@@ -71,31 +81,59 @@ class TestCSN1D(unittest.TestCase):
         self.assertEqual(len(csn_pdf_arr.shape), 2)
 
     def test_wrong_n(self):
+        params1Dz_dict = self.params1Dz_dict.copy()
 
+        params1Dz_dict["n"] = 1.1
         self.assertRaises(
-            ClosedSkewNormal(
-                mu_z = np.array([[ 3.0]]),
-                nu_z = np.array([[ 4.0]]),
-                Sigma_z = np.array([[ 2.0]]),
-                Gamma_z = np.array([[-5.0]]),
-                Delta_z = np.array([[ 3.0]]),
-                n = 2,
-                q = 1
-            )
+            AttributeError,
+            ClosedSkewNormal,
+            params1Dz_dict
+        )
+        params1Dz_dict["n"] = "1"
+        self.assertRaises(
+            AttributeError,
+            ClosedSkewNormal,
+            params1Dz_dict
+        )
+        params1Dz_dict["n"] = True
+        self.assertRaises(
+            AttributeError,
+            ClosedSkewNormal,
+            params1Dz_dict
+        )
+        params1Dz_dict["n"] = None
+        self.assertRaises(
+            AttributeError,
+            ClosedSkewNormal,
+            params1Dz_dict
         )
 
     def test_wrong_q(self):
+        params1Dz_dict = self.params1Dz_dict.copy()
+
+        params1Dz_dict["q"] = 1
         self.assertRaises(
-            ClosedSkewNormal(
-                mu_z = np.array([[ 3.0]]),
-                nu_z = np.array([[ 4.0]]),
-                Sigma_z = np.array([[ 2.0]]),
-                Gamma_z = np.array([[-5.0]]),
-                Delta_z = np.array([[ 3.0]]),
-                n = 1,
-                q = 2
-            ),
-            AttributeError
+            AttributeError,
+            ClosedSkewNormal,
+            params1Dz_dict
+        )
+        params1Dz_dict["q"] = "1"
+        self.assertRaises(
+            AttributeError,
+            ClosedSkewNormal,
+            params1Dz_dict
+        )
+        params1Dz_dict["q"] = True
+        self.assertRaises(
+            AttributeError,
+            ClosedSkewNormal,
+            params1Dz_dict
+        )
+        params1Dz_dict["q"] = None
+        self.assertRaises(
+            AttributeError,
+            ClosedSkewNormal,
+            params1Dz_dict
         )
 
 if __name__ == "__main__":
