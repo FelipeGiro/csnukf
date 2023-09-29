@@ -10,28 +10,78 @@ class ClosedSkewNormal:
     (mu_z, Sigma_z, Gamma_z, nu_z, Delta_z).
     
     """
-    def __init__(self, mu=None, Sigma=None, mu_z=None, Sigma_z=None, Gamma_z=None, nu_z=None, Delta_z=None):
+    def __init__(self, mu=None, Sigma=None, mu_z=None, Sigma_z=None, Gamma_z=None, nu_z=None, Delta_z=None, n=1, q=1):
         
-        bivariate = np.all((mu==None) & (Sigma==None))
-        distribution = (mu_z==None) & (Sigma_z==None) & (Gamma_z==None) & (nu_z==None) & (Delta_z==None)
+        if np.any([~isinstance(n, int), ~isinstance(q, int)]):
+            if np.any([n > 0, q > 0]):
+                self.n = n
+                self.q = q
+            else:
+                raise ValueError("q and n must be positive.")
+        else:
+            raise ValueError("q and n must be positive integers.")
+
+        bivariate = np.all((mu is None) & (Sigma is None))
+        distribution = (mu_z is None) & (Sigma_z is None) & (Gamma_z is None) & (nu_z is None) & (Delta_z is None)
         
         if ~bivariate & distribution:
-            self.mu = np.atleast_2d(mu)
+            self.mu = np.atleast_1d(mu).flatten()
             self.Sigma = np.atleast_2d(Sigma)
             
+            self._check_dims_xy()
+
             self._bivariate2z()
             
         elif bivariate & ~distribution:
-            self.mu_z = np.atleast_2d(mu_z)
+
+            self.mu_z = np.atleast_1d(mu_z).flatten()
             self.Sigma_z = np.atleast_2d(Sigma_z)
             self.Gamma_z = np.atleast_2d(Gamma_z)
-            self.nu_z = np.atleast_2d(nu_z)
+            self.nu_z = np.atleast_1d(nu_z).flatten()
             self.Delta_z = np.atleast_2d(Delta_z)
             
+            self._check_dims_z()
+
             self._z2bivariate()
         else:
-            print("No value were correctly inputed.")
-            
+            raise AttributeError("Wronge value inputed")
+    
+    def _check_dims_z(self):
+        n_z, q_z = self.n, self.q
+
+        if self.mu_z.shape != (n_z, ):
+            raise AttributeError(
+                "Shape of mu_z {} is different of n {}".format(self.mu_z.shape, (n_z, ))
+                )
+        if self.Sigma_z.shape != (n_z, n_z):
+            raise AttributeError(
+                "Shape of Sigma_z {} is different of n x n {}".format(self.Sigma_z.shape, (n_z, n_z))
+                )
+        if self.Gamma_z.shape != (q_z, n_z):
+            raise AttributeError(
+                "Shape of Gamma_z_z {} is different of q x n {}".format(self.Gamma_z.shape, (q_z, n_z))
+                )
+        if self.nu_z.shape != (q_z, ):
+            raise AttributeError(
+                "Shape of nu_z {} is different of q {}".format(self.nu_z.shape, (q_z, ))
+                )
+        if self.Delta_z.shape != (q_z, q_z):
+            raise AttributeError(
+                "Shape of Delta_z {} is different of q x q {}".format(self.Delta_z.shape, (q_z, q_z))
+                )
+
+    def _check_dims_xy(self):
+        n_plus_q = self.n + self.q
+        
+        if self.mu.shape != (n_plus_q, ):
+            raise AttributeError(
+                "Shape of mu {} is different of n+q {}".format(self.mu.shape, (n_plus_q, ))
+                )
+        if self.Sigma.shape != (n_plus_q, n_plus_q):
+            raise AttributeError(
+                "Shape of Sigma {} is different of n+q,n+q {}".format(self.Sigma.shape, (n_plus_q, n_plus_q))
+                )
+
     def _bivariate2z(self):
         mu = self.mu
         Sigma = self.Sigma
@@ -43,24 +93,21 @@ class ClosedSkewNormal:
         Gamma_xy = Sigma[0, 1]
         Gamma_yx = Sigma[1, 0]
         
-        self.mu_z = np.atleast_2d(mu_x)
+        self.mu_z = np.atleast_1d(mu_x).flatten()
         self.Sigma_z = np.atleast_2d(Sigma_x)
         self.Gamma_z = np.atleast_2d(Gamma_yx/Sigma_x)
-        self.nu_z = np.atleast_2d(-mu_y)
+        self.nu_z = np.atleast_1d(-mu_y).flatten()
         self.Delta_z = np.atleast_2d(Sigma_y - Gamma_yx*Sigma_x**(-1)*Gamma_xy)
     
     def _z2bivariate(self):
-        mu_z = float(self.mu_z)
-        Sigma_z = float(self.Sigma_z)
-        Gamma_z = float(self.Gamma_z)
-        nu_z = float(self.nu_z)
-        Delta_z = float(self.Delta_z)
+        mu_z = self.mu_z
+        Sigma_z = self.Sigma_z
+        Gamma_z = self.Gamma_z
+        nu_z = self.nu_z
+        Delta_z = self.Delta_z
     
-        self.mu = np.array([
-            [ mu_z],
-            [-nu_z]
-        ])
-        self.Sigma = np.array([
+        self.mu = np.vstack([mu_z,-nu_z]).flatten()
+        self.Sigma = np.block([
             [Sigma_z        , Sigma_z*Gamma_z                  ],
             [Gamma_z*Sigma_z, Delta_z + Gamma_z*Sigma_z*Gamma_z]
         ])
@@ -135,3 +182,19 @@ class ClosedSkewNormal:
         text += f'  nu_z : {self.nu_z}\n'
         text += f'  Delta_z : {self.Delta_z}\n'
         return text
+
+if __name__ == "__main__":
+    lambda_l = 0
+
+    mu_0 = np.array([30, 2])*1e4 # altitude and velocity
+    Delta_0 = np.eye(2)*(1 - lambda_l**2)
+    Sigma_x = np.diag([1e3, 4e2])
+
+    obj = ClosedSkewNormal(
+        mu_z=mu_0, 
+        Sigma_z=Sigma_x, 
+        Gamma_z=lambda_l*Sigma_x**(1/2), 
+        nu_z=np.zeros(2), 
+        Delta_z=Delta_0
+    )
+    print(obj)

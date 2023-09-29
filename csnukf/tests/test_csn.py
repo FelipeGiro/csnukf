@@ -70,5 +70,33 @@ class TestCSN1D(unittest.TestCase):
 
         self.assertEqual(len(csn_pdf_arr.shape), 2)
 
+    def test_wrong_n(self):
+
+        self.assertRaises(
+            ClosedSkewNormal(
+                mu_z = np.array([[ 3.0]]),
+                nu_z = np.array([[ 4.0]]),
+                Sigma_z = np.array([[ 2.0]]),
+                Gamma_z = np.array([[-5.0]]),
+                Delta_z = np.array([[ 3.0]]),
+                n = 2,
+                q = 1
+            )
+        )
+
+    def test_wrong_q(self):
+        self.assertRaises(
+            ClosedSkewNormal(
+                mu_z = np.array([[ 3.0]]),
+                nu_z = np.array([[ 4.0]]),
+                Sigma_z = np.array([[ 2.0]]),
+                Gamma_z = np.array([[-5.0]]),
+                Delta_z = np.array([[ 3.0]]),
+                n = 1,
+                q = 2
+            ),
+            AttributeError
+        )
+
 if __name__ == "__main__":
     unittest.main()
