@@ -85,13 +85,14 @@ class ClosedSkewNormal:
     def _bivariate2z(self):
         mu = self.mu
         Sigma = self.Sigma
+        n, q = self.n, self.q
         
-        mu_x = mu[0]
-        mu_y = mu[1]
-        Sigma_x = Sigma[0, 0]
-        Sigma_y = Sigma[1, 1]
-        Gamma_xy = Sigma[0, 1]
-        Gamma_yx = Sigma[1, 0]
+        mu_x = mu[:n]
+        mu_y = mu[n:]
+        Sigma_x = Sigma[:n, :n]
+        Sigma_y = Sigma[n:, n:]
+        Gamma_xy = Sigma[:n, n:]
+        Gamma_yx = Sigma[n:, :n]
         
         self.mu_z = np.atleast_1d(mu_x).flatten()
         self.Sigma_z = np.atleast_2d(Sigma_x)
