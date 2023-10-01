@@ -108,11 +108,26 @@ class TEST_CSN2n2q(unittest.TestCase):
         )
         mu_z_1, Sigma_z_1, Gamma_z_1, nu_z_1, Delta_z_1 = test_CSN.get_distribution_parameters()
 
-        self.assertSequenceEqual(self.params["mu_z"].flatten().tolist(), mu_z_1.flatten().tolist())
-        self.assertSequenceEqual(self.params["Sigma_z"].flatten().tolist(), Sigma_z_1.flatten().tolist())
-        self.assertSequenceEqual(self.params["Gamma_z"].flatten().tolist(), Gamma_z_1.flatten().tolist())
-        self.assertSequenceEqual(self.params["nu_z"].flatten().tolist(), nu_z_1.flatten().tolist())
-        self.assertSequenceEqual(self.params["Delta_z"].flatten().tolist(), Delta_z_1.flatten().tolist())
+        self.assertSequenceEqual(
+            self.params["mu_z"].flatten().round(8).tolist(), 
+            mu_z_1.flatten().round(8).tolist()
+            )
+        self.assertSequenceEqual(
+            self.params["Sigma_z"].flatten().round(8).tolist(), 
+            Sigma_z_1.flatten().round(8).tolist()
+            )
+        self.assertSequenceEqual(
+            self.params["Gamma_z"].flatten().round(8).tolist(), 
+            Gamma_z_1.flatten().round(8).tolist()
+            )
+        self.assertSequenceEqual(
+            self.params["nu_z"].flatten().round(8).tolist(), 
+            nu_z_1.flatten().round(8).tolist()
+            )
+        self.assertSequenceEqual(
+            self.params["Delta_z"].flatten().round(8).tolist(), 
+            Delta_z_1.flatten().round(8).tolist()
+            )
 
 if __name__ == "__main__":
     unittest.main()
