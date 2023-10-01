@@ -10,42 +10,75 @@ class ClosedSkewNormal:
     (mu_z, Sigma_z, Gamma_z, nu_z, Delta_z).
     
     """
-    def __init__(self, mu=None, Sigma=None, mu_z=None, Sigma_z=None, Gamma_z=None, nu_z=None, Delta_z=None, n=1, q=1):
-        
-        if np.any([~isinstance(n, int), ~isinstance(q, int)]):
-            if np.any([n > 0, q > 0]):
-                self.n = n
-                self.q = q
-            else:
-                raise ValueError("q and n must be positive.")
-        else:
-            raise ValueError("q and n must be positive integers.")
+    def __init__(
+            self, 
+            mu = None, Sigma = None, n = None, q = None,
+            mu_z = None, Sigma_z = None, Gamma_z = None, nu_z = None, Delta_z = None,
+            mu_x = None, mu_y = None, Sigma_x = None, Sigma_y = None, Gamma_xy = None, # Gamma_yx = None,
+            ):
 
-        bivariate = np.all((mu is None) & (Sigma is None))
-        distribution = (mu_z is None) & (Sigma_z is None) & (Gamma_z is None) & (nu_z is None) & (Delta_z is None)
-        
-        if ~bivariate & distribution:
+        # check variables availability
+        var_aval = (mu is not None) & (Sigma is not None) & (n is not None) & (q is not None)
+        var_aval_z = (mu_z is not None) & (Sigma_z is not None) & (Gamma_z is not None) & (nu_z is not None) & (Delta_z is not None)
+        var_aval_xy = (mu_x is not None) & (mu_y is not None) & (Sigma_x is not None) & (Sigma_y is not None) & (Gamma_xy is not None)
+
+        if var_aval & ~var_aval_z & ~var_aval_xy:
             self.mu = np.atleast_1d(mu).flatten()
             self.Sigma = np.atleast_2d(Sigma)
+            self.n = n
+            self.q = q
             
-            self._check_dims_xy()
+            self._check_dims()
 
             self._bivariate2z()
+            self._bivariate2xy()
             
-        elif bivariate & ~distribution:
+        elif ~var_aval & var_aval_z & ~var_aval_xy:
 
             self.mu_z = np.atleast_1d(mu_z).flatten()
             self.Sigma_z = np.atleast_2d(Sigma_z)
             self.Gamma_z = np.atleast_2d(Gamma_z)
             self.nu_z = np.atleast_1d(nu_z).flatten()
             self.Delta_z = np.atleast_2d(Delta_z)
-            
+
+            self.n = len(self.mu_z)
+            self.q = len(self.nu_z)
+
             self._check_dims_z()
 
             self._z2bivariate()
+            self._z2xy()
+
+        elif ~var_aval & ~var_aval_z & var_aval_xy:
+            
+            Gamma_yx = Gamma_xy
+
+            self.mu_x = mu_x
+            self.mu_y = mu_y
+            self.Sigma_x = Sigma_x
+            self.Sigma_y = Sigma_y
+            self.Gamma_xy = Gamma_xy
+            self.Gamma_yx = Gamma_yx
+
+            self._check_dims_xy()
+            self._xy2z()
+            self._xy2bivariate()
+
         else:
-            raise AttributeError("Wronge value inputed")
+            raise AttributeError("Wrong value inputed")
     
+    def _check_dims(self):
+        n_plus_q = self.n + self.q
+        
+        if self.mu.shape != (n_plus_q, ):
+            raise AttributeError(
+                "Shape of mu {} is different of n+q {}".format(self.mu.shape, (n_plus_q, ))
+                )
+        if self.Sigma.shape != (n_plus_q, n_plus_q):
+            raise AttributeError(
+                "Shape of Sigma {} is different of n+q,n+q {}".format(self.Sigma.shape, (n_plus_q, n_plus_q))
+                )
+
     def _check_dims_z(self):
         n_z, q_z = self.n, self.q
 
@@ -96,9 +129,18 @@ class ClosedSkewNormal:
         
         self.mu_z = np.atleast_1d(mu_x).flatten()
         self.Sigma_z = np.atleast_2d(Sigma_x)
-        self.Gamma_z = np.atleast_2d(Gamma_yx/Sigma_x)
+        self.Gamma_z = np.atleast_2d(np.matmul(Gamma_yx, np.linalg.inv(Sigma_x)))
         self.nu_z = np.atleast_1d(-mu_y).flatten()
-        self.Delta_z = np.atleast_2d(Sigma_y - Gamma_yx*Sigma_x**(-1)*Gamma_xy)
+        self.Delta_z = np.atleast_2d(
+            Sigma_y - np.matmul(
+                np.matmul(
+                    Gamma_yx, np.linalg.inv(Sigma_x)
+                    ), Gamma_xy
+                )
+                )
+        
+    def _bivariate2xy(self):
+        pass
     
     def _z2bivariate(self):
         mu_z = self.mu_z
@@ -112,6 +154,15 @@ class ClosedSkewNormal:
             [Sigma_z        , Sigma_z*Gamma_z                  ],
             [Gamma_z*Sigma_z, Delta_z + Gamma_z*Sigma_z*Gamma_z]
         ])
+
+    def _z2xy(self):
+        pass
+
+    def _xy2bivariate(self):
+        pass
+
+    def _xy2z(self):
+        pass
     
     def pdf_bivariate(self, pos):
         """
@@ -165,7 +216,7 @@ class ClosedSkewNormal:
     
     def get_bivariate_parameters(self):
         # get mean and covatiance of underlying bi-variate normal
-        return self.mu, self.Sigma
+        return self.mu, self.Sigma, self.n, self.q
     
     def get_distribution_parameters(self):
         # get paramters of CSN distribution
@@ -173,19 +224,20 @@ class ClosedSkewNormal:
     
     def __str__(self):
         text = 'Closed Skewed Normal\n====================\n'
+        text += f'  n, q:\n({self.n}, {self.q})\n'
         text += 'Bivariate parameters:\n'
         text += f'  mu:\n{self.mu}\n'
         text += f'  Sigma:\n{self.Sigma}\n'
         text += 'Distribution parameters:\n'
-        text += f'  mu_z: {self.mu_z}\n'
-        text += f'  Sigma_z : {self.Sigma_z}\n'
-        text += f'  Gamma_z : {self.Gamma_z}\n'
-        text += f'  nu_z : {self.nu_z}\n'
-        text += f'  Delta_z : {self.Delta_z}\n'
+        text += f'  mu_z:\n{self.mu_z}\n'
+        text += f'  Sigma_z:\n{self.Sigma_z}\n'
+        text += f'  Gamma_z:\n{self.Gamma_z}\n'
+        text += f'  nu_z:\n{self.nu_z}\n'
+        text += f'  Delta_z:\n{self.Delta_z}\n'
         return text
 
 if __name__ == "__main__":
-    lambda_l = 0
+    lambda_l = 0.2
 
     mu_0 = np.array([30, 2])*1e4 # altitude and velocity
     Delta_0 = np.eye(2)*(1 - lambda_l**2)
@@ -196,6 +248,6 @@ if __name__ == "__main__":
         Sigma_z=Sigma_x, 
         Gamma_z=lambda_l*Sigma_x**(1/2), 
         nu_z=np.zeros(2), 
-        Delta_z=Delta_0
+        Delta_z=Delta_0,
     )
     print(obj)
