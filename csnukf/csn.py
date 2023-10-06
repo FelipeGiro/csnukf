@@ -60,6 +60,9 @@ class ClosedSkewNormal:
             self.Gamma_xy = np.atleast_2d(Gamma_xy)
             self.Gamma_yx = np.atleast_2d(Gamma_yx)
 
+            self.n = len(self.mu_x)
+            self.q = len(self.mu_y)
+
             self._check_dims_xy()
             self._xy2z()
             self._xy2bivariate()
