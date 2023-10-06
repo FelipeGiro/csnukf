@@ -69,7 +69,7 @@ class ClosedSkewNormal:
 
         else:
             raise AttributeError(
-                "Conflict in variables inputs"
+                "Input variables must from one type of distribution only."
                 )
     
     def _check_dims(self):
