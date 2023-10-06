@@ -53,12 +53,12 @@ class ClosedSkewNormal:
             
             Gamma_yx = Gamma_xy
 
-            self.mu_x = mu_x
-            self.mu_y = mu_y
-            self.Sigma_x = Sigma_x
-            self.Sigma_y = Sigma_y
-            self.Gamma_xy = Gamma_xy
-            self.Gamma_yx = Gamma_yx
+            self.mu_x = np.atleast_1d(mu_x)
+            self.mu_y = np.atleast_1d(mu_y)
+            self.Sigma_x = np.atleast_2d(Sigma_x)
+            self.Sigma_y = np.atleast_2d(Sigma_y)
+            self.Gamma_xy = np.atleast_2d(Gamma_xy)
+            self.Gamma_yx = np.atleast_2d(Gamma_yx)
 
             self._check_dims_xy()
             self._xy2z()
