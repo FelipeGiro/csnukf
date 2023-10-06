@@ -18,11 +18,11 @@ class ClosedSkewNormal:
             ):
 
         # check variables availability
-        var_aval = (mu is not None) & (Sigma is not None) & (n is not None) & (q is not None)
-        var_aval_z = (mu_z is not None) & (Sigma_z is not None) & (Gamma_z is not None) & (nu_z is not None) & (Delta_z is not None)
-        var_aval_xy = (mu_x is not None) & (mu_y is not None) & (Sigma_x is not None) & (Sigma_y is not None) & (Gamma_xy is not None)
+        var_aval = [(mu is not None), (Sigma is not None), (n is not None), (q is not None)]
+        var_aval_z = [(mu_z is not None), (Sigma_z is not None), (Gamma_z is not None), (nu_z is not None), (Delta_z is not None)]
+        var_aval_xy = [(mu_x is not None), (mu_y is not None), (Sigma_x is not None), (Sigma_y is not None), (Gamma_xy is not None)]
 
-        if var_aval & ~var_aval_z & ~var_aval_xy:
+        if np.all(var_aval) & ~np.all(var_aval_z) & ~np.all(var_aval_xy):
             self.mu = np.atleast_1d(mu).flatten()
             self.Sigma = np.atleast_2d(Sigma)
             self.n = n
@@ -33,7 +33,7 @@ class ClosedSkewNormal:
             self._bivariate2z()
             self._bivariate2xy()
             
-        elif ~var_aval & var_aval_z & ~var_aval_xy:
+        elif ~np.all(var_aval) & np.all(var_aval_z) & ~np.all(var_aval_xy):
 
             self.mu_z = np.atleast_1d(mu_z).flatten()
             self.Sigma_z = np.atleast_2d(Sigma_z)
@@ -49,7 +49,7 @@ class ClosedSkewNormal:
             self._z2bivariate()
             self._z2xy()
 
-        elif ~var_aval & ~var_aval_z & var_aval_xy:
+        elif ~np.all(var_aval) & ~np.all(var_aval_z) & np.all(var_aval_xy):
             
             Gamma_yx = Gamma_xy
 
@@ -68,7 +68,9 @@ class ClosedSkewNormal:
             self._xy2bivariate()
 
         else:
-            raise AttributeError("Wrong value inputed")
+            raise AttributeError(
+                "Conflict in variables inputs"
+                )
     
     def _check_dims(self):
         n_plus_q = self.n + self.q
