@@ -74,6 +74,12 @@ class TestCSN1D(unittest.TestCase):
 
         self.assertEqual(len(csn_pdf_arr.shape), 2)
 
+    def test_rvs(self, n_samples = int(1e6)):
+        Y = self.csn1D_obj.rvs(n_samples)
+        likelyhood_mean = self.csn1D_obj.pdf_z(Y).mean()
+
+        self.assertLess(likelyhood_mean, .4)
+
 class test_CSN2n2q(unittest.TestCase):
 
     def setUp(self) -> None:
