@@ -234,7 +234,11 @@ class ClosedSkewNormal:
         g = G.pdf
 
         minus_f = lambda x : -f(x)
-        c = minimize(minus_f, G.mean).x/g(G.mean)*1.1
+        fx = np.abs(minimize(minus_f, G.mean, method="Powell").x)
+        gx = g(G.mean)
+        c = fx/gx
+
+        print("f(x)/g(x) : {}/{}={}".format(fx, gx, c))
 
         rejected_samples = np.ones(size, dtype=bool)
         Y_arr = list()
