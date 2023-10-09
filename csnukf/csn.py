@@ -1,6 +1,8 @@
 import numpy as np
 from scipy.stats import norm, multivariate_normal
 
+from scipy.optimize import minimize
+
 class ClosedSkewNormal:
     """
     Closed Skewed Normal
@@ -219,6 +221,38 @@ class ClosedSkewNormal:
         
         return (term1**(-1)*term2*term3).flatten()
     
+    def rvs(self, size):
+        """
+        Random variable sampling
+        ========================
+
+        Attention! Working only for 1D distributions in z
+        """
+        G =  multivariate_normal(self.mu_z, self.Sigma_z)
+
+        f = self.pdf_z
+        g = G.pdf
+
+        minus_f = lambda x : -f(x)
+        c = minimize(minus_f, G.mean).x/g(G.mean)*1.1
+
+        rejected_samples = np.ones(size, dtype=bool)
+        Y_arr = list()
+        while rejected_samples.sum() > 0:
+            
+            size = rejected_samples.sum()
+            
+            Y = G.rvs(size)
+            U = np.random.uniform(0, 1, size)
+            rejected_samples = U > (f(Y)/(c*g(Y)))
+            
+            if isinstance(Y, float):
+                Y = np.atleast_1d(Y)
+            
+            Y_arr.append(Y[~rejected_samples].copy())
+        
+        return np.hstack(Y_arr)
+
     def get_bivariate_parameters(self):
         # get mean and covatiance of underlying bi-variate normal
         return self.mu, self.Sigma, self.n, self.q
