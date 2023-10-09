@@ -238,8 +238,10 @@ class ClosedSkewNormal:
         gx = g(G.mean)
         c = fx/gx
 
-        print("f(x)/g(x) : {}/{}={}".format(fx, gx, c))
+        print("c=f(x)/g(x) : {}={}/{}".format(c, fx, gx))
 
+        # acceptance-rejection method 
+        # (see http://www.columbia.edu/~ks20/4703-Sigman/4703-07-Notes-ARM.pdf)
         rejected_samples = np.ones(size, dtype=bool)
         Y_arr = list()
         while rejected_samples.sum() > 0:
