@@ -74,7 +74,7 @@ class TestCSN1D(unittest.TestCase):
 
         self.assertEqual(len(csn_pdf_arr.shape), 2)
 
-class TEST_CSN2n2q(unittest.TestCase):
+class test_CSN2n2q(unittest.TestCase):
 
     def setUp(self) -> None:
 
