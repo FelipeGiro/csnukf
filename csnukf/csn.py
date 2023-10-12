@@ -156,10 +156,16 @@ class ClosedSkewNormal:
         nu_z = self.nu_z
         Delta_z = self.Delta_z
     
-        self.mu = np.vstack([mu_z,-nu_z]).flatten()
+        self.mu = np.hstack([mu_z.flatten(),-nu_z.flatten()])
+
+        Sigma11 = Sigma_z
+        Sigma12 = np.matmul(Sigma_z, Gamma_z.T)
+        Sigma21 = np.matmul(Gamma_z, Sigma_z)
+        Sigma22 = Delta_z + np.matmul(np.matmul(Gamma_z, Sigma_z), Gamma_z.T)
+
         self.Sigma = np.block([
-            [Sigma_z        , Sigma_z*Gamma_z                  ],
-            [Gamma_z*Sigma_z, Delta_z + Gamma_z*Sigma_z*Gamma_z]
+            [Sigma11, Sigma12],
+            [Sigma21, Sigma22]
         ])
 
     def _z2xy(self):
@@ -215,10 +221,21 @@ class ClosedSkewNormal:
         nu_z = self.nu_z
         Delta_z = self.Delta_z
         
-        term1 = norm.cdf(0, nu_z, np.sqrt(Delta_z + Gamma_z*Sigma_z*Gamma_z.T))
-        term2 = norm.cdf(Gamma_z*(z - mu_z), nu_z, np.sqrt(Delta_z))
-        term3 = norm.pdf(z, mu_z, np.sqrt(Sigma_z))
-        
+        term1 = multivariate_normal.cdf(
+            np.zeros(self.q), 
+            nu_z, 
+            Delta_z + np.matmul(
+                np.matmul(Gamma_z, Sigma_z), 
+                Gamma_z.T
+            )
+        )
+        term2 = multivariate_normal.cdf(
+            np.matmul(Gamma_z, np.atleast_2d(z - mu_z)).T, # Gamma_z*(z - mu_z), 
+            nu_z, 
+            Delta_z
+        )
+        term3 = multivariate_normal.pdf(z, mu_z, Sigma_z)
+
         return (term1**(-1)*term2*term3).flatten()
     
     def rvs(self, size):
@@ -295,4 +312,24 @@ if __name__ == "__main__":
         nu_z=np.zeros(2), 
         Delta_z=Delta_0,
     )
+
+    obj = ClosedSkewNormal(
+        n = 1,
+        q = 2,
+        mu = [ 2., -4.,  3.],
+        Sigma = np.array(
+            [
+                [3.  , -30.,  -3. ],
+                [-30., 287.7, 30. ],
+                [ -3.,  30. , 32.7]
+            ]
+        )
+    )
+
+    z = np.linspace(-5, 5, 1000)
+
     print(obj)
+
+    obj.pdf_z(z)
+
+    
