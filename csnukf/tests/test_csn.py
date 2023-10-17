@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 from csnukf import ClosedSkewNormal
 
-class TestCSN1D(unittest.TestCase):
+class TestCSN1n1q(unittest.TestCase):
     
     def setUp(self):
 
