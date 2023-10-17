@@ -3,6 +3,50 @@ import unittest
 import numpy as np
 from csnukf import ClosedSkewNormal
 
+from scipy.stats import multivariate_normal
+
+class TestCSN1n0q(unittest.TestCase):
+    
+    def setUp(self):
+
+        self.params = {
+            "mu" : np.array([[ 3.0]]),
+            "Sigma" : np.array([[ 4.0]]),
+            "n" : 1,
+            "q" : 0
+        }
+
+    def test_conversion_1n0q(self):
+        # bi-variate
+        test_CSN = ClosedSkewNormal(**self.params)
+
+        mu, Sigma, n, q = test_CSN.get_bivariate_parameters()
+
+        # to z
+        test_CSN = ClosedSkewNormal(
+            mu = mu,
+            Sigma = Sigma,
+            n = n,
+            q = q
+        )
+
+        mu_z_1, Sigma_z_1, Gamma_z_1, nu_z_1, Delta_z_1 = test_CSN.get_distribution_parameters()
+
+        self.assertEqual(self.params["mu"], mu_z_1)
+        self.assertEqual(self.params["Sigma"], Sigma_z_1)
+        self.assertEqual(0, Gamma_z_1.size)
+        self.assertEqual(0, nu_z_1.size)
+        self.assertEqual(0, Delta_z_1.size)
+
+        self.assertEqual(multivariate_normal(self.params["mu"], self.params["Sigma"]).pdf(6), test_CSN.pdf_z(6))
+        self.assertEqual(multivariate_normal(self.params["mu"], self.params["Sigma"]).pdf(3), test_CSN.pdf_z(3))
+        self.assertEqual(multivariate_normal(self.params["mu"], self.params["Sigma"]).pdf(0), test_CSN.pdf_z(0))
+        self.assertEqual(multivariate_normal(self.params["mu"], self.params["Sigma"]).pdf(-3), test_CSN.pdf_z(-3))
+        self.assertEqual(multivariate_normal(self.params["mu"], self.params["Sigma"]).pdf(-6), test_CSN.pdf_z(-6))
+
+        self.assertEqual(multivariate_normal(self.params["mu"], self.params["Sigma"]).pdf(1.268), test_CSN.pdf_z(1.268))
+        self.assertEqual(multivariate_normal(self.params["mu"], self.params["Sigma"]).pdf(0.005874), test_CSN.pdf_z(0.005874))
+        
 class TestCSN1n1q(unittest.TestCase):
     
     def setUp(self):
