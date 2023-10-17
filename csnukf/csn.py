@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.linalg import block_diag
 from scipy.stats import norm, multivariate_normal
 
 from scipy.optimize import minimize
@@ -283,6 +284,63 @@ class ClosedSkewNormal:
     def get_distribution_parameters(self):
         # get paramters of CSN distribution
         return self.mu_z, self.Sigma_z, self.Gamma_z, self.nu_z, self.Delta_z
+
+    def __add__(self, other):
+        """
+        Add a CSN
+        =========
+
+        Source:
+            Graciela Gonzalez-Farias; Armando Dominguez-Molina, Arjun K. Guptac; 2004. 
+            Additive properties of skew normal random vectors
+            https://doi.org/10.1016/j.jspi.2003.09.008
+        """
+
+        if self.n != other.n:
+            raise ValueError("Parameter n of both CSN objects should be equal: {} != {}".format(self.n, other.n))
+        else:
+            n = self.n
+
+        q = self.q + other.q
+        mu = self.mu_z + other.mu_z
+        Sigma = self.Sigma_z + other.Sigma_z
+
+        invSumSigma = np.linalg.inv(self.Sigma_z + other.Sigma_z)
+        Gamma = np.hstack(
+            [
+                np.matmul(self.Sigma_z, self.Gamma_z.T),
+                np.matmul(other.Sigma_z, other.Gamma_z.T)
+            ]
+        ).T*invSumSigma
+        nu = np.hstack([self.nu_z, other.nu_z])
+
+        Delta_cross = block_diag(self.Delta_z, other.Delta_z)
+        Gamma_cross = block_diag(self.Gamma_z, other.Gamma_z)
+        Sigma_cross = block_diag(self.Sigma_z, other.Sigma_z)
+
+        term1 = np.matmul(np.matmul(Gamma_cross, Sigma_cross), Gamma_cross.T)
+        term2 = np.hstack([
+            np.matmul(self.Gamma_z, self.Sigma_z),
+            np.matmul(other.Gamma_z, other.Sigma_z)
+        ]).T
+        term3 = np.linalg.inv(self.Sigma_z + other.Sigma_z)
+        term4 = np.hstack([
+            np.matmul(self.Sigma_z, self.Gamma_z.T),
+            np.matmul(other.Sigma_z, other.Gamma_z.T)
+        ])
+        Delta = Delta_cross + term1 - np.matmul(np.matmul(term2, term3), term4)
+
+        result = ClosedSkewNormal(
+            n=n, 
+            q=q,
+            mu_z = mu,
+            nu_z = nu,
+            Sigma_z = Sigma,
+            Gamma_z = Gamma,
+            Delta_z = Delta
+        )
+
+        return result
     
     def __str__(self):
         text = 'Closed Skewed Normal\n====================\n'
