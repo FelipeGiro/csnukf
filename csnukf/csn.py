@@ -222,22 +222,26 @@ class ClosedSkewNormal:
         nu_z = self.nu_z
         Delta_z = self.Delta_z
         
-        term1 = multivariate_normal.cdf(
-            np.zeros(self.q), 
-            nu_z, 
-            Delta_z + np.matmul(
-                np.matmul(Gamma_z, Sigma_z), 
-                Gamma_z.T
+        if self.q > 0:
+            term1 = multivariate_normal.cdf(
+                np.zeros(self.q), 
+                nu_z, 
+                Delta_z + np.matmul(
+                    np.matmul(Gamma_z, Sigma_z), 
+                    Gamma_z.T
+                )
             )
-        )
-        term2 = multivariate_normal.cdf(
-            np.matmul(Gamma_z, np.atleast_2d(z - mu_z)).T, # Gamma_z*(z - mu_z), 
-            nu_z, 
-            Delta_z
-        )
-        term3 = multivariate_normal.pdf(z, mu_z, Sigma_z)
+            term2 = multivariate_normal.cdf(
+                np.matmul(Gamma_z, np.atleast_2d(z - mu_z)).T, # Gamma_z*(z - mu_z), 
+                nu_z, 
+                Delta_z
+            )
+            term3 = multivariate_normal.pdf(z, mu_z, Sigma_z)
 
-        return (term1**(-1)*term2*term3).flatten()
+            return (term1**(-1)*term2*term3).flatten()
+        
+        else:
+            return multivariate_normal.pdf(z, mu_z, Sigma_z)
     
     def rvs(self, size):
         """
@@ -373,15 +377,9 @@ if __name__ == "__main__":
 
     obj = ClosedSkewNormal(
         n = 1,
-        q = 2,
-        mu = [ 2., -4.,  3.],
-        Sigma = np.array(
-            [
-                [3.  , -30.,  -3. ],
-                [-30., 287.7, 30. ],
-                [ -3.,  30. , 32.7]
-            ]
-        )
+        q = 0,
+        mu = [ 2.],
+        Sigma = np.array([[3.]])
     )
 
     z = np.linspace(-5, 5, 1000)
