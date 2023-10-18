@@ -222,7 +222,23 @@ class ClosedSkewNormal:
         nu_z = self.nu_z
         Delta_z = self.Delta_z
         
-        if self.q > 0:
+        # for 1-dimensional CSN
+        # usefull for fitting
+        # scipy.stats.norm performance is significantly superior than scipy.stats.multivariate_normal
+        if (self.n == 1) & (self.q == 1): 
+            mu_z = float(self.mu_z)
+            Sigma_z = float(self.Sigma_z)
+            Gamma_z = float(self.Gamma_z)
+            nu_z = float(self.nu_z)
+            Delta_z = float(self.Delta_z)
+
+            term1 = norm.cdf(0, nu_z, np.sqrt(Delta_z + Gamma_z*Sigma_z*Gamma_z))
+            term2 = norm.cdf(Gamma_z*(z - mu_z), nu_z, np.sqrt(Delta_z))
+            term3 = norm.pdf(z, mu_z, np.sqrt(Sigma_z))
+
+            return term1**(-1)*term2*term3
+
+        elif self.q > 1:
             term1 = multivariate_normal.cdf(
                 np.zeros(self.q), 
                 nu_z, 
@@ -232,7 +248,7 @@ class ClosedSkewNormal:
                 )
             )
             term2 = multivariate_normal.cdf(
-                np.matmul(Gamma_z, np.atleast_2d(z - mu_z)).T, # Gamma_z*(z - mu_z), 
+                np.matmul(Gamma_z, np.atleast_2d(z - mu_z)).T,
                 nu_z, 
                 Delta_z
             )
@@ -361,19 +377,6 @@ class ClosedSkewNormal:
         return text
 
 if __name__ == "__main__":
-    lambda_l = 0.2
-
-    mu_0 = np.array([30, 2])*1e4 # altitude and velocity
-    Delta_0 = np.eye(2)*(1 - lambda_l**2)
-    Sigma_x = np.diag([1e3, 4e2])
-
-    obj = ClosedSkewNormal(
-        mu_z=mu_0, 
-        Sigma_z=Sigma_x, 
-        Gamma_z=lambda_l*Sigma_x**(1/2), 
-        nu_z=np.zeros(2), 
-        Delta_z=Delta_0,
-    )
 
     obj = ClosedSkewNormal(
         n = 1,
