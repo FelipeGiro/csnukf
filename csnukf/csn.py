@@ -301,9 +301,18 @@ class ClosedSkewNormal:
         # get mean and covatiance of underlying bi-variate normal
         return self.mu, self.Sigma, self.n, self.q
     
-    def get_distribution_parameters(self):
+    def get_distribution_parameters(self, type=None):
         # get paramters of CSN distribution
-        return self.mu_z, self.Sigma_z, self.Gamma_z, self.nu_z, self.Delta_z
+        if type is None:
+            return self.mu_z, self.Sigma_z, self.Gamma_z, self.nu_z, self.Delta_z
+        elif type.lower() is "dict":
+            return {
+                "mu_z" : self.mu_z, 
+                "Sigma_z" : self.Sigma_z, 
+                "Gamma_z" : self.Gamma_z, 
+                "nu_z" : self.nu_z, 
+                "Delta_z" : self.Delta_z
+            }
 
     def __add__(self, other):
         """
