@@ -364,6 +364,22 @@ class ClosedSkewNormal:
 
         return result
     
+    def __sub__(self, other):
+
+        
+        mu_z, Sigma_z, Gamma_z, nu_z, Delta_z = other.get_distribution_parameters()
+
+        # recriate the class for negative random variable
+        other = ClosedSkewNormal(
+            mu_z = -mu_z, # negative here
+            nu_z = nu_z,
+            Sigma_z = Sigma_z,
+            Gamma_z = -Gamma_z, # negative here
+            Delta_z = Delta_z
+        )
+
+        return self + other
+
     def __str__(self):
         text = 'Closed Skewed Normal\n====================\n'
         text += f'  n, q:\n({self.n}, {self.q})\n'
