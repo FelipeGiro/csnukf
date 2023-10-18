@@ -321,10 +321,12 @@ class ClosedSkewNormal:
         else:
             n = self.n
 
+        # for <normal> or x component R**(n, 1)
         q = self.q + other.q
         mu = self.mu_z + other.mu_z
         Sigma = self.Sigma_z + other.Sigma_z
 
+        # for <skewness> or y component R**(q, 1)
         invSumSigma = np.linalg.inv(self.Sigma_z + other.Sigma_z)
         Gamma = np.hstack(
             [
@@ -339,10 +341,10 @@ class ClosedSkewNormal:
         Sigma_cross = block_diag(self.Sigma_z, other.Sigma_z)
 
         term1 = np.matmul(np.matmul(Gamma_cross, Sigma_cross), Gamma_cross.T)
-        term2 = np.hstack([
+        term2 = np.vstack([
             np.matmul(self.Gamma_z, self.Sigma_z),
             np.matmul(other.Gamma_z, other.Sigma_z)
-        ]).T
+        ])
         term3 = np.linalg.inv(self.Sigma_z + other.Sigma_z)
         term4 = np.hstack([
             np.matmul(self.Sigma_z, self.Gamma_z.T),
@@ -378,17 +380,30 @@ class ClosedSkewNormal:
 
 if __name__ == "__main__":
 
-    obj = ClosedSkewNormal(
+    obj1 = ClosedSkewNormal(
         n = 1,
         q = 0,
         mu = [ 2.],
         Sigma = np.array([[3.]])
     )
 
-    z = np.linspace(-5, 5, 1000)
+    obj2 = ClosedSkewNormal(
+        n = 1,
+        q = 1,
+        mu = [ 2., .3],
+        Sigma = np.array(
+            [
+                [3., .4],
+                [.4, 1.2]
+            ]
+        )
+    )
 
-    print(obj)
+    print(obj2)
 
-    obj.pdf_z(z)
+    print(obj1 + obj2)
+
+
+
 
     
