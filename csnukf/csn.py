@@ -305,7 +305,7 @@ class ClosedSkewNormal:
         # get paramters of CSN distribution
         if type is None:
             return self.mu_z, self.Sigma_z, self.Gamma_z, self.nu_z, self.Delta_z
-        elif type.lower() is "dict":
+        elif type == "dict":
             return {
                 "mu_z" : self.mu_z, 
                 "Sigma_z" : self.Sigma_z, 
