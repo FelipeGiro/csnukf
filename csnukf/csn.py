@@ -310,6 +310,31 @@ class ClosedSkewNormal:
             }
 
     def __add__(self, other):
+        
+        if isinstance(other, ClosedSkewNormal):
+            result = self._add_CSN(other)
+        else:
+            try:
+                other = np.atleast_1d(other)
+            except:
+                raise TypeError("Invalid type! {}".format(type(other)))
+            result = self._add_cte(other)
+
+        return result
+        
+    def _add_cte(self, other):
+        """
+        Add a array-like
+        ================
+        """
+        if self.n == len(other):
+            params_dict = self.get_distribution_parameters(type="dict")
+            params_dict["mu_z"] = params_dict["mu_z"] + other
+            return ClosedSkewNormal(**params_dict)
+        else:
+            raise ValueError("Array size is {}, but must be n ({})".format(other.shape, self.n))
+        
+    def _add_CSN(self, other):
         """
         Add a CSN
         =========
@@ -370,17 +395,19 @@ class ClosedSkewNormal:
     
     def __sub__(self, other):
 
-        
-        mu_z, Sigma_z, Gamma_z, nu_z, Delta_z = other.get_distribution_parameters()
+        if isinstance(other, ClosedSkewNormal):
+            mu_z, Sigma_z, Gamma_z, nu_z, Delta_z = other.get_distribution_parameters()
 
-        # recriate the class for negative random variable
-        other = ClosedSkewNormal(
-            mu_z = -mu_z, # negative here
-            nu_z = nu_z,
-            Sigma_z = Sigma_z,
-            Gamma_z = -Gamma_z, # negative here
-            Delta_z = Delta_z
-        )
+            # recriate the class for negative random variable
+            other = ClosedSkewNormal(
+                mu_z = -mu_z, # negative here
+                nu_z = nu_z,
+                Sigma_z = Sigma_z,
+                Gamma_z = -Gamma_z, # negative here
+                Delta_z = Delta_z
+            )
+        else:
+            other = -other 
 
         return self + other
 
