@@ -179,5 +179,54 @@ class test_CSN2n2q(unittest.TestCase):
             Delta_z_1.flatten().round(8).tolist()
             )
 
+class test_operations(unittest.TestCase):
+    def setUp(self) -> None:
+        # closed skew normal obsjects
+        self.csn1_1n1q = ClosedSkewNormal(
+            mu_z = np.array([[ 0.0]]),
+            nu_z = np.array([[ 5.0]]),
+            Sigma_z = np.array([[ 8.0]]),
+            Gamma_z = np.array([[ 5.0]]),
+            Delta_z = np.array([[ 3.0]])
+        )
+
+        self.csn2_1n1q = ClosedSkewNormal(
+            mu_z = np.array([[-1.8]]),
+            nu_z = np.array([[0.5]]),
+            Sigma_z = np.array([[ 1.5]]),
+            Gamma_z = np.array([[-2.0]]),
+            Delta_z = np.array([[1.0]])
+        )
+
+        self.csn3_1n1q = ClosedSkewNormal(
+            mu_z = np.array([[ 0.0]]),
+            nu_z = np.array([[ 0.0]]),
+            Sigma_z = np.array([[ 1.0]]),
+            Gamma_z = np.array([[ -2.0]]),
+            Delta_z = np.array([[ 3.0]])
+        )
+
+        self.csn4_2n1q = ClosedSkewNormal(
+            mu_z = np.array([[0.0], [1.0]]),
+            Sigma_z = np.array([[ 1.0, .1], [.1, .8]]),
+            nu_z = np.array([[ 0.0]]),
+            Gamma_z = np.array([[ -2.0, -.5]]),
+            Delta_z = np.array([[ 3.0]])
+        )
+
+    def test_sum2CSNs_1d(self):
+        csn_result = self.csn1_1n1q + self.csn2_1n1q
+
+        self.assertEqual(csn_result.q, self.csn1_1n1q.q + self.csn2_1n1q.q)
+        self.assertEqual(csn_result.n, self.csn1_1n1q.n)
+        self.assertEqual(csn_result.n, self.csn2_1n1q.n)
+
+    def test_sum3CSNs_1d(self):
+        csn_result = self.csn1_1n1q + self.csn2_1n1q + self.csn3_1n1q
+
+        self.assertEqual(csn_result.q, self.csn1_1n1q.q + self.csn2_1n1q.q + self.csn3_1n1q.q)
+        self.assertEqual(csn_result.n, self.csn1_1n1q.n)
+        self.assertEqual(csn_result.n, self.csn2_1n1q.n)
+
 if __name__ == "__main__":
     unittest.main()
