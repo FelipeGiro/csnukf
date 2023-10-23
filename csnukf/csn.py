@@ -410,6 +410,21 @@ class ClosedSkewNormal:
             other = -other 
 
         return self + other
+    
+    def __mul__(self, other):
+        if isinstance(other, ClosedSkewNormal):
+            raise ArithmeticError("Multiplication of CSNs not available yet.")
+        else:
+            return ClosedSkewNormal(
+                mu = self.mu*other,
+                Sigma = self.Sigma*other**2,
+                n = self.n,
+                q = self.q
+            )
+        
+    def __truediv__(self, other):
+        other = 1/other
+        return self*other
 
     def __str__(self):
         text = 'Closed Skewed Normal\n====================\n'
