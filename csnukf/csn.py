@@ -17,24 +17,22 @@ class ClosedSkewNormal:
             self, 
             mu = None, Sigma = None, n = None, q = None,
             mu_z = None, Sigma_z = None, Gamma_z = None, nu_z = None, Delta_z = None,
-            mu_x = None, mu_y = None, Sigma_x = None, Sigma_y = None, Gamma_xy = None, # Gamma_yx = None,
+            mu_x = None, mu_y = None, Sigma_x = None, Sigma_y = None, Gamma_xy = None, Gamma_yx = None,
             ):
 
         # check variables availability
         var_aval = [(mu is not None), (Sigma is not None), (n is not None), (q is not None)]
         var_aval_z = [(mu_z is not None), (Sigma_z is not None), (Gamma_z is not None), (nu_z is not None), (Delta_z is not None)]
-        var_aval_xy = [(mu_x is not None), (mu_y is not None), (Sigma_x is not None), (Sigma_y is not None), (Gamma_xy is not None)]
+        var_aval_xy = [(mu_x is not None), (mu_y is not None), (Sigma_x is not None), (Sigma_y is not None), (Gamma_xy is not None), (Gamma_yx is not None)]
 
         if np.all(var_aval) & ~np.all(var_aval_z) & ~np.all(var_aval_xy):
             self.mu = np.atleast_1d(mu).flatten()
             self.Sigma = np.atleast_2d(Sigma)
             self.n = n
             self.q = q
-            
-            self._check_dims()
 
-            self._bivariate2z()
-            self._bivariate2xy()
+            self._mvn2z()
+            self._mvn2xy()
             
         elif ~np.all(var_aval) & np.all(var_aval_z) & ~np.all(var_aval_xy):
 
@@ -47,14 +45,10 @@ class ClosedSkewNormal:
             self.n = len(self.mu_z)
             self.q = len(self.nu_z)
 
-            self._check_dims_z()
-
-            self._z2bivariate()
+            self._z2mvn()
             self._z2xy()
 
         elif ~np.all(var_aval) & ~np.all(var_aval_z) & np.all(var_aval_xy):
-            
-            Gamma_yx = Gamma_xy
 
             self.mu_x = np.atleast_1d(mu_x)
             self.mu_y = np.atleast_1d(mu_y)
@@ -66,16 +60,19 @@ class ClosedSkewNormal:
             self.n = len(self.mu_x)
             self.q = len(self.mu_y)
 
-            self._check_dims_xy()
-            self._xy2z()
-            self._xy2bivariate()
+            self._xy2mvn()
+            self._mvn2z()
 
         else:
             raise AttributeError(
                 "Input variables must from one type of distribution only."
                 )
+        
+        self._check_dims_mvn()
+        self._check_dims_xy()
+        self._check_dims_z()
     
-    def _check_dims(self):
+    def _check_dims_mvn(self):
         n_plus_q = self.n + self.q
         
         if self.mu.shape != (n_plus_q, ):
@@ -123,7 +120,7 @@ class ClosedSkewNormal:
                 "Shape of Sigma {} is different of n+q,n+q {}".format(self.Sigma.shape, (n_plus_q, n_plus_q))
                 )
 
-    def _bivariate2z(self):
+    def _mvn2z(self):
         mu = self.mu
         Sigma = self.Sigma
         n, q = self.n, self.q
@@ -147,10 +144,20 @@ class ClosedSkewNormal:
                 )
                 )
         
-    def _bivariate2xy(self):
-        pass
+    def _mvn2xy(self):
+        mu = self.mu
+        Sigma = self.Sigma
+        n = self.n
+        q = self.q
+
+        self.mu_x = mu[:n]
+        self.mu_y = mu[n:]
+        self.Sigma_x = Sigma[:n, :n]
+        self.Sigma_y = Sigma[n:, n:]
+        self.Gamma_xy = Sigma[:n, n:]
+        self.Gamma_yx = Sigma[n:, :n]
     
-    def _z2bivariate(self):
+    def _z2mvn(self):
         mu_z = self.mu_z
         Sigma_z = self.Sigma_z
         Gamma_z = self.Gamma_z
@@ -170,15 +177,40 @@ class ClosedSkewNormal:
         ])
 
     def _z2xy(self):
-        pass
+        mu_z = self.mu_z
+        Sigma_z = self.Sigma_z
+        Gamma_z = self.Gamma_z
+        nu_z = self.nu_z
+        Delta_z = self.Delta_z
 
-    def _xy2bivariate(self):
-        pass
+        self.mu_x = mu_z
+        self.mu_y = -nu_z
+        self.Sigma_x = Sigma_z
+        self.Sigma_y = Delta_z + np.matmul(np.matmul(Gamma_z, Sigma_z), Gamma_z.T)
+        self.Gamma_xy = np.matmul(Sigma_z, Gamma_z.T)
+        self.Gamma_yx = np.matmul(Gamma_z, Sigma_z)
 
-    def _xy2z(self):
-        pass
+    def _xy2mvn(self):
+        mu_x = self.mu_x
+        mu_y = self.mu_y
+        Sigma_x = self.Sigma_x
+        Sigma_y = self.Sigma_y
+        Gamma_xy = self.Gamma_xy
+        Gamma_yx = self.Gamma_yx
+
+        if self.q > 0:
+            self.mu = np.hstack([mu_x, mu_y])
+            self.Sigma = np.block(
+                [
+                    [Sigma_x, Gamma_xy],
+                    [Gamma_yx, Sigma_y]
+                ]
+            )
+        elif self.q == 0:
+            self.mu = mu_x
+            self.Sigma = Sigma_x
     
-    def pdf_bivariate(self, pos):
+    def pdf_mvn(self, pos):
         """
         Get PDF of bivariate normal
         ===========================
@@ -259,6 +291,9 @@ class ClosedSkewNormal:
         else:
             return multivariate_normal.pdf(z, mu_z, Sigma_z)
     
+    def pdf(self, x):
+        return self.pdf_z(x)
+
     def rvs(self, size):
         """
         Random variable sampling
@@ -292,6 +327,56 @@ class ClosedSkewNormal:
         
         return np.hstack(Y_arr)
 
+    def get_mvn_parameters(self, output_type="tuple"):
+        if output_type.lower() == "tuple":
+            return self.mu, self.Sigma, self.n, self.q
+        elif output_type.lower() == "dict":
+            return {
+                "mu" : self.mu, 
+                "Sigma" : self.Sigma, 
+                "n" : self.n,
+                "q" : self.q
+            }
+        else:
+            raise ValueError("output_type ({}) must be tuple or dict".format(output_type))
+
+    def get_xy_parameters(self, output_type="tuple"):
+        if output_type.lower() == "tuple":
+            return self.mu_x, self.mu_y, self.Sigma_x, self.Sigma_y
+        elif output_type.lower() == "dict":
+            return {
+                "mu_x" : self.mu_x, 
+                "mu_y" : self.mu_y, 
+                "Sigma_x" : self.Sigma_x, 
+                "Sigma_y" : self.Sigma_y,
+                "Gamma_xy" : self.Gamma_xy,
+                "Gamma_yx" : self.Gamma_yx,
+            }
+        else:
+            raise ValueError("output_type ({}) must be tuple or dict".format(output_type))
+
+    def get_z_parameters(self, output_type="tuple"):
+        if output_type.lower() == "tuple":
+            return self.mu_z, self.Sigma_z, self.Gamma_z, self.nu_z, self.Delta_z
+        elif output_type.lower() == "dict":
+            return {
+                "mu_z" : self.mu_z, 
+                "Sigma_z" : self.Sigma_z, 
+                "Gamma_z" : self.Gamma_z, 
+                "nu_z" : self.nu_z, 
+                "Delta_z" : self.Delta_z
+            }
+        else:
+            raise ValueError("output_type ({}) must be tuple or dict".format(output_type))
+
+    def get_all_parameters(self):
+        # dictionary only
+        return dict(
+            **self.get_mvn_parameters(output_type="dict"),
+            **self.get_xy_parameters(output_type="dict"),
+            **self.get_z_parameters(output_type="dict")
+            )
+
     def get_parameters(self, func_dim="mvn", output_type="tuple"):
 
         # check inputs
@@ -302,44 +387,15 @@ class ClosedSkewNormal:
         
         # output selection
         if (func_dim.lower() == "mvn") or (func_dim.lower() == "multivariate_normal"):
-            if output_type.lower() == "tuple":
-                return self.mu, self.Sigma, self.n, self.q
-            elif output_type.lower() == "dict":
-                return {
-                    "mu" : self.mu, 
-                    "Sigma" : self.Sigma, 
-                    "n" : self.n,
-                    "q" : self.q
-                }
-            else:
-                raise ValueError("output_type ({}) must be tuple or dict".format(output_type))
+            return self.get_mvn_parameters(output_type="dict")
         elif func_dim.lower() == "xy":
-            if output_type.lower() == "tuple":
-                return self.mu_x, self.mu_y, self.Sigma_x, self.Sigma_y
-            elif output_type.lower() == "dict":
-                return {
-                    "mu_x" : self.mu_x, 
-                    "mu_y" : self.mu_y, 
-                    "Sigma_x" : self.Sigma_x, 
-                    "Sigma_y" : self.Sigma_y, 
-                }
-            else:
-                raise ValueError("output_type ({}) must be tuple or dict".format(output_type))
+            return self.get_xy_parameters(output_type="dict")
         elif func_dim.lower() == "z":
-            if output_type.lower() == "tuple":
-                return self.mu_z, self.Sigma_z, self.Gamma_z, self.nu_z, self.Delta_z
-            elif output_type.lower() == "dict":
-                return {
-                    "mu_z" : self.mu_z, 
-                    "Sigma_z" : self.Sigma_z, 
-                    "Gamma_z" : self.Gamma_z, 
-                    "nu_z" : self.nu_z, 
-                    "Delta_z" : self.Delta_z
-                }
-            else:
-                raise ValueError("output_type ({}) must be tuple or dict".format(output_type))
+            return self.get_z_parameters(output_type="dict")
+        elif func_dim.lower() == "all":
+            return self.get_all_parameters()
         else:
-            raise ValueError("func_dim ({}) must be multivariate_normal, xy, or z.".format(func_dim))
+            raise ValueError("func_dim ({}) must be multivariate_normal/mvn, xy, z, or all.".format(func_dim))
         
     def __add__(self, other):
         
@@ -457,6 +513,26 @@ class ClosedSkewNormal:
     def __truediv__(self, other):
         other = 1/other
         return self*other
+    
+    def __eq__(self, other):
+        if not isinstance(other, ClosedSkewNormal):
+            raise TypeError("Variable must be a csnukf.csn.ClosedSkewNormal object")
+        
+        params_csn1_dict = self.get_all_parameters()
+        params_csn2_dict = self.get_all_parameters()
+
+        key_list = np.array(list(params_csn1_dict.keys()))
+
+        var_equal_list = list()
+        for key in key_list:
+            var_equal_list.append(np.ravel(params_csn1_dict[key] == params_csn2_dict[key]))
+
+        equal = np.all(np.hstack(var_equal_list))
+
+        if ~equal:
+            print("Unequal variables:", key_list[~var_equal_list])
+
+        return equal
 
     def __str__(self):
         text = 'Closed Skewed Normal\n====================\n'
@@ -474,28 +550,27 @@ class ClosedSkewNormal:
 
 if __name__ == "__main__":
 
-    obj1 = ClosedSkewNormal(
-        n = 1,
-        q = 0,
-        mu = [ 2.],
-        Sigma = np.array([[3.]])
-    )
+    params_ref = {
+            "mu" : np.array([[ 3.0], [1.2], [9]]),
+            "Sigma" : np.array(
+                [
+                    [ 2.0, 5.5, .9],
+                    [ 5.5, 6, 1.1],
+                    [ .9, 1.1, 4.6]
+                    ]
+                ),
+            "n" : 2,
+            "q" : 1
+        }
+    csn_obj = ClosedSkewNormal(**params_ref)
 
-    obj2 = ClosedSkewNormal(
-        n = 1,
-        q = 1,
-        mu = [ 2., .3],
-        Sigma = np.array(
-            [
-                [3., .4],
-                [.4, 1.2]
-            ]
-        )
-    )
+    params_mvn = csn_obj.get_parameters("mvn", "dict")
+    params_xy = csn_obj.get_parameters("xy", "dict")
+    params_z = csn_obj.get_parameters("z", "dict")
 
-    print(obj2)
-
-    print(obj1 + obj2)
+    csn_from_mvn = ClosedSkewNormal(**params_mvn)
+    csn_from_xy = ClosedSkewNormal(**params_xy)
+    csn_from_z = ClosedSkewNormal(**params_z)
 
 
 
