@@ -5,179 +5,187 @@ from csnukf import ClosedSkewNormal
 
 from scipy.stats import multivariate_normal
 
-class TestCSN1n0q(unittest.TestCase):
-    
+class Test_CSN(unittest.TestCase):
     def setUp(self):
-
-        self.params = {
+        self.z = np.atleast_2d(np.linspace(-100,100, 201))
+    
+    def test_csn_n1q0(self):
+        params_ref = {
             "mu" : np.array([[ 3.0]]),
             "Sigma" : np.array([[ 4.0]]),
             "n" : 1,
             "q" : 0
         }
+        csn_obj = ClosedSkewNormal(**params_ref)
 
-    def test_conversion_1n0q(self):
-        # bi-variate
-        test_CSN = ClosedSkewNormal(**self.params)
+        params_mvn = csn_obj.get_parameters("mvn", "dict")
+        params_xy = csn_obj.get_parameters("xy", "dict")
+        params_z = csn_obj.get_parameters("z", "dict")
 
-        mu, Sigma, n, q = test_CSN.get_bivariate_parameters()
+        csn_from_mvn = ClosedSkewNormal(**params_mvn)
+        csn_from_xy = ClosedSkewNormal(**params_xy)
+        csn_from_z = ClosedSkewNormal(**params_z)
 
-        # to z
-        test_CSN = ClosedSkewNormal(
-            mu = mu,
-            Sigma = Sigma,
-            n = n,
-            q = q
-        )
+        self.assertTrue(csn_from_mvn == csn_from_xy, "CSN(mvn) != CSN(xy)")
+        self.assertTrue(csn_from_xy == csn_from_z, "CSN(xy) != CSN(z)")
+        self.assertTrue(csn_from_z == csn_from_mvn, "CSN(z) != CSN(mvn)")
 
-        mu_z_1, Sigma_z_1, Gamma_z_1, nu_z_1, Delta_z_1 = test_CSN.get_distribution_parameters()
+        self.assertTrue(csn_from_mvn == csn_from_mvn, "CSN(mvn) != CSN(mvn)")
+        self.assertTrue(csn_from_xy == csn_from_xy, "CSN(xy) != CSN(xy)")
+        self.assertTrue(csn_from_z == csn_from_z, "CSN(z) != CSN(z)")
 
-        self.assertEqual(self.params["mu"], mu_z_1)
-        self.assertEqual(self.params["Sigma"], Sigma_z_1)
-        self.assertEqual(0, Gamma_z_1.size)
-        self.assertEqual(0, nu_z_1.size)
-        self.assertEqual(0, Delta_z_1.size)
+        z = np.repeat(self.z, repeats=csn_obj.n, axis=0).T
+        self.assertListEqual(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
+        self.assertListEqual(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
+        self.assertListEqual(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
 
-        self.assertEqual(multivariate_normal(self.params["mu"], self.params["Sigma"]).pdf(6), test_CSN.pdf_z(6))
-        self.assertEqual(multivariate_normal(self.params["mu"], self.params["Sigma"]).pdf(3), test_CSN.pdf_z(3))
-        self.assertEqual(multivariate_normal(self.params["mu"], self.params["Sigma"]).pdf(0), test_CSN.pdf_z(0))
-        self.assertEqual(multivariate_normal(self.params["mu"], self.params["Sigma"]).pdf(-3), test_CSN.pdf_z(-3))
-        self.assertEqual(multivariate_normal(self.params["mu"], self.params["Sigma"]).pdf(-6), test_CSN.pdf_z(-6))
+    def test_csn_n1q1(self):
 
-        self.assertEqual(multivariate_normal(self.params["mu"], self.params["Sigma"]).pdf(1.268), test_CSN.pdf_z(1.268))
-        self.assertEqual(multivariate_normal(self.params["mu"], self.params["Sigma"]).pdf(0.005874), test_CSN.pdf_z(0.005874))
-        
-class TestCSN1n1q(unittest.TestCase):
-    
-    def setUp(self):
-
-        # bi-variate
-        self.csn1D_obj = ClosedSkewNormal(
-            mu_z = np.array([[ 3.0]]),
-            nu_z = np.array([[ 4.0]]),
-            Sigma_z = np.array([[ 2.0]]),
-            Gamma_z = np.array([[-5.0]]),
-            Delta_z = np.array([[ 3.0]])
-        )
-
-        self.params = {
+        params_ref = {
             "mu_z" : np.array([[ 3.0]]),
-            "nu_z" : np.array([[ 4.0]]),
             "Sigma_z" : np.array([[ 2.0]]),
+            "nu_z" : np.array([[ 4.0]]),
             "Gamma_z" : np.array([[-5.0]]),
-            "Delta_z" : np.array([[ 3.0]]),
+            "Delta_z" : np.array([[ 3.0]])
         }
 
-    def test_conversion_1n1q(self):
-        
-        mu_z_0 = np.array([[ 3.0]])
-        nu_z_0 = np.array([[ 4.0]])
-        Sigma_z_0 = np.array([[ 2.0]])
-        Gamma_z_0 = np.array([[-5.0]])
-        Delta_z_0 = np.array([[ 3.0]])
+        csn_obj = ClosedSkewNormal(**params_ref)
 
-        # bi-variate
-        test_CSN = ClosedSkewNormal(**self.params)
+        params_mvn = csn_obj.get_parameters("mvn", "dict")
+        params_xy = csn_obj.get_parameters("xy", "dict")
+        params_z = csn_obj.get_parameters("z", "dict")
 
-        mu, Sigma, n, q = test_CSN.get_bivariate_parameters()
+        csn_from_mvn = ClosedSkewNormal(**params_mvn)
+        csn_from_xy = ClosedSkewNormal(**params_xy)
+        csn_from_z = ClosedSkewNormal(**params_z)
 
-        # to z
-        test_CSN = ClosedSkewNormal(
-            mu = mu,
-            Sigma = Sigma,
-            n = n,
-            q = q
-        )
-        mu_z_1, Sigma_z_1, Gamma_z_1, nu_z_1, Delta_z_1 = test_CSN.get_distribution_parameters()
+        self.assertTrue(csn_from_mvn == csn_from_xy, "CSN(mvn) != CSN(xy)")
+        self.assertTrue(csn_from_xy == csn_from_z, "CSN(xy) != CSN(z)")
+        self.assertTrue(csn_from_z == csn_from_mvn, "CSN(z) != CSN(mvn)")
 
-        self.assertEqual(mu_z_0, mu_z_1)
-        self.assertEqual(Sigma_z_0, Sigma_z_1)
-        self.assertEqual(Gamma_z_0, Gamma_z_1)
-        self.assertEqual(nu_z_0, nu_z_1)
-        self.assertEqual(Delta_z_0, Delta_z_1)
+        self.assertTrue(csn_from_mvn == csn_from_mvn, "CSN(mvn) != CSN(mvn)")
+        self.assertTrue(csn_from_xy == csn_from_xy, "CSN(xy) != CSN(xy)")
+        self.assertTrue(csn_from_z == csn_from_z, "CSN(z) != CSN(z)")
 
-        self.csn1D_obj = test_CSN
+        z = np.repeat(self.z, repeats=csn_obj.n, axis=0).T
+        self.assertListEqual(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
+        self.assertListEqual(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
+        self.assertListEqual(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
+    
+    def test_csn_n1q2(self):
 
-    def test_pdf_z(self):
-
-        z = np.linspace(-4, 4, num=250)
-        csn_pdf_arr = self.csn1D_obj.pdf_z(z)
-
-        self.assertEqual(len(csn_pdf_arr.shape), 1)
-        self.assertEqual(csn_pdf_arr.shape, z.shape)
-
-    def test_bi_pdf(self):
-
-        x_biv = np.linspace(-1, 2, num = 250)
-        y_biv = np.linspace(-8, 8, num = 250)
-        X, Y = np.meshgrid(x_biv, y_biv)
-        pos = np.dstack((X, Y))
-
-        z = np.linspace(-4, 4, num=250)
-        csn_pdf_arr = self.csn1D_obj.pdf_bivariate(pos)
-
-        self.assertEqual(len(csn_pdf_arr.shape), 2)
-
-    def test_rvs(self, n_samples = int(1e6)):
-        Y = self.csn1D_obj.rvs(n_samples)
-        likelyhood_mean = self.csn1D_obj.pdf_z(Y).mean()
-
-        self.assertLess(likelyhood_mean, .4)
-
-class test_CSN2n2q(unittest.TestCase):
-
-    def setUp(self) -> None:
-
-        lambda_l = 0.2
-
-        mu_0 = np.array([30, 2])*1e4 # altitude and velocity
-        Delta_0 = np.eye(2)*(1 - lambda_l**2)
-        Sigma_x = np.diag([1e3, 4e2])
-
-        self.params = {
-            "mu_z"    : mu_0,
-            "Sigma_z" : np.diag([1e3, 4e2]),
-            "Gamma_z" : lambda_l*Sigma_x**(1/2), 
-            "nu_z"    : np.zeros(2),
-            "Delta_z" : Delta_0,
+        params_ref = {
+            
+            "mu" : np.array([[ 3.0], [1.2], [9]]),
+            "Sigma" : np.array(
+                [
+                    [ 12.0, 5.5, .9],
+                    [ 5.5, 6, 1.1],
+                    [ .9, 1.1, 1.6]
+                    ]
+                ),
+            "n" : 1,
+            "q" : 2
         }
 
-    def test_conversion_2n2q(self):
+        csn_obj = ClosedSkewNormal(**params_ref)
 
-        # bi-variate
-        test_CSN = ClosedSkewNormal(**self.params)
+        params_mvn = csn_obj.get_parameters("mvn", "dict")
+        params_xy = csn_obj.get_parameters("xy", "dict")
+        params_z = csn_obj.get_parameters("z", "dict")
 
-        mu, Sigma, n, q = test_CSN.get_bivariate_parameters()
+        csn_from_mvn = ClosedSkewNormal(**params_mvn)
+        csn_from_xy = ClosedSkewNormal(**params_xy)
+        csn_from_z = ClosedSkewNormal(**params_z)
 
-        # to z
-        test_CSN = ClosedSkewNormal(
-            mu = mu,
-            Sigma = Sigma,
-            n = n,
-            q = q
-        )
-        mu_z_1, Sigma_z_1, Gamma_z_1, nu_z_1, Delta_z_1 = test_CSN.get_distribution_parameters()
+        self.assertTrue(csn_from_mvn == csn_from_xy, "CSN(mvn) != CSN(xy)")
+        self.assertTrue(csn_from_xy == csn_from_z, "CSN(xy) != CSN(z)")
+        self.assertTrue(csn_from_z == csn_from_mvn, "CSN(z) != CSN(mvn)")
 
-        self.assertSequenceEqual(
-            self.params["mu_z"].flatten().round(8).tolist(), 
-            mu_z_1.flatten().round(8).tolist()
-            )
-        self.assertSequenceEqual(
-            self.params["Sigma_z"].flatten().round(8).tolist(), 
-            Sigma_z_1.flatten().round(8).tolist()
-            )
-        self.assertSequenceEqual(
-            self.params["Gamma_z"].flatten().round(8).tolist(), 
-            Gamma_z_1.flatten().round(8).tolist()
-            )
-        self.assertSequenceEqual(
-            self.params["nu_z"].flatten().round(8).tolist(), 
-            nu_z_1.flatten().round(8).tolist()
-            )
-        self.assertSequenceEqual(
-            self.params["Delta_z"].flatten().round(8).tolist(), 
-            Delta_z_1.flatten().round(8).tolist()
-            )
+        self.assertTrue(csn_from_mvn == csn_from_mvn, "CSN(mvn) != CSN(mvn)")
+        self.assertTrue(csn_from_xy == csn_from_xy, "CSN(xy) != CSN(xy)")
+        self.assertTrue(csn_from_z == csn_from_z, "CSN(z) != CSN(z)")
+
+        z = np.repeat(self.z, repeats=csn_obj.n, axis=0).T
+        self.assertListEqual(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
+        self.assertListEqual(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
+        self.assertListEqual(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
+
+    def test_csn_n2q1(self):
+
+        params_ref = {
+            "mu" : np.array([[ 3.0], [1.2], [9]]),
+            "Sigma" : np.array(
+                [
+                    [ 2.0, 5.5, .9],
+                    [ 5.5, 6, 1.1],
+                    [ .9, 1.1, 4.6]
+                    ]
+                ),
+            "n" : 2,
+            "q" : 1
+        }
+
+        csn_obj = ClosedSkewNormal(**params_ref)
+
+        params_mvn = csn_obj.get_parameters("mvn", "dict")
+        params_xy = csn_obj.get_parameters("xy", "dict")
+        params_z = csn_obj.get_parameters("z", "dict")
+
+        csn_from_mvn = ClosedSkewNormal(**params_mvn)
+        csn_from_xy = ClosedSkewNormal(**params_xy)
+        csn_from_z = ClosedSkewNormal(**params_z)
+
+        self.assertTrue(csn_from_mvn == csn_from_xy, "CSN(mvn) != CSN(xy)")
+        self.assertTrue(csn_from_xy == csn_from_z, "CSN(xy) != CSN(z)")
+        self.assertTrue(csn_from_z == csn_from_mvn, "CSN(z) != CSN(mvn)")
+
+        self.assertTrue(csn_from_mvn == csn_from_mvn, "CSN(mvn) != CSN(mvn)")
+        self.assertTrue(csn_from_xy == csn_from_xy, "CSN(xy) != CSN(xy)")
+        self.assertTrue(csn_from_z == csn_from_z, "CSN(z) != CSN(z)")
+    
+    def test_csn_n2q2(self):
+
+        params_ref = {
+            "mu_z" : np.array([[ 3.0, 4.0]]),
+            "Sigma_z" : np.array(
+                [
+                    [ 2.0, 5.5],
+                    [ 5.5, 6]
+                    ]
+                ),
+            "nu_z" : np.array([[ -3.0, 4.0]]),
+            "Gamma_z" : np.array(
+                [
+                    [ 4.0, 2.2],
+                    [ 2.2, 3]
+                    ]
+                ),
+            "Delta_z" : np.array(
+                [
+                    [ 3.0, -1],
+                    [ -1, 9]
+                    ]
+                ),
+        }
+
+        csn_obj = ClosedSkewNormal(**params_ref)
+
+        params_mvn = csn_obj.get_parameters("mvn", "dict")
+        params_xy = csn_obj.get_parameters("xy", "dict")
+        params_z = csn_obj.get_parameters("z", "dict")
+
+        csn_from_mvn = ClosedSkewNormal(**params_mvn)
+        csn_from_xy = ClosedSkewNormal(**params_xy)
+        csn_from_z = ClosedSkewNormal(**params_z)
+
+        self.assertTrue(csn_from_mvn == csn_from_xy, "CSN(mvn) != CSN(xy)")
+        self.assertTrue(csn_from_xy == csn_from_z, "CSN(xy) != CSN(z)")
+        self.assertTrue(csn_from_z == csn_from_mvn, "CSN(z) != CSN(mvn)")
+
+        self.assertTrue(csn_from_mvn == csn_from_mvn, "CSN(mvn) != CSN(mvn)")
+        self.assertTrue(csn_from_xy == csn_from_xy, "CSN(xy) != CSN(xy)")
+        self.assertTrue(csn_from_z == csn_from_z, "CSN(z) != CSN(z)")
 
 class test_operations(unittest.TestCase):
     def setUp(self) -> None:

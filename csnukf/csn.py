@@ -26,10 +26,12 @@ class ClosedSkewNormal:
         var_aval_xy = [(mu_x is not None), (mu_y is not None), (Sigma_x is not None), (Sigma_y is not None), (Gamma_xy is not None), (Gamma_yx is not None)]
 
         if np.all(var_aval) & ~np.all(var_aval_z) & ~np.all(var_aval_xy):
-            self.mu = np.atleast_1d(mu).flatten()
-            self.Sigma = np.atleast_2d(Sigma)
             self.n = n
             self.q = q
+            self.mu = np.atleast_1d(mu).reshape((n+q, 1))
+            self.Sigma = np.atleast_2d(Sigma)
+
+            self._check_dims_mvn()
 
             self._mvn2z()
             self._mvn2xy()
@@ -45,13 +47,18 @@ class ClosedSkewNormal:
             self.n = len(self.mu_z)
             self.q = len(self.nu_z)
 
+            self.mu_z = self.mu_z.reshape((self.n, 1))
+            self.nu_z = self.nu_z.reshape((self.q, 1))
+
+            self._check_dims_z()
+
             self._z2mvn()
             self._z2xy()
 
         elif ~np.all(var_aval) & ~np.all(var_aval_z) & np.all(var_aval_xy):
 
-            self.mu_x = np.atleast_1d(mu_x)
-            self.mu_y = np.atleast_1d(mu_y)
+            self.mu_x = np.atleast_1d(mu_x).flatten()
+            self.mu_y = np.atleast_1d(mu_y).flatten()
             self.Sigma_x = np.atleast_2d(Sigma_x)
             self.Sigma_y = np.atleast_2d(Sigma_y)
             self.Gamma_xy = np.atleast_2d(Gamma_xy)
@@ -59,6 +66,11 @@ class ClosedSkewNormal:
 
             self.n = len(self.mu_x)
             self.q = len(self.mu_y)
+
+            self.mu_x = self.mu_x.reshape((self.n, 1))
+            self.mu_y = self.mu_y.reshape((self.q, 1))
+
+            self._check_dims_xy()
 
             self._xy2mvn()
             self._mvn2z()
@@ -68,6 +80,12 @@ class ClosedSkewNormal:
                 "Input variables must from one type of distribution only."
                 )
         
+        
+        self._check_dims_mvn()
+        self._check_dims_xy()
+        self._check_dims_z()
+    
+    
         self._check_dims_mvn()
         self._check_dims_xy()
         self._check_dims_z()
@@ -75,9 +93,9 @@ class ClosedSkewNormal:
     def _check_dims_mvn(self):
         n_plus_q = self.n + self.q
         
-        if self.mu.shape != (n_plus_q, ):
+        if self.mu.shape != (n_plus_q, 1):
             raise AttributeError(
-                "Shape of mu {} is different of n+q {}".format(self.mu.shape, (n_plus_q, ))
+                "Shape of mu {} is different of n+q {}".format(self.mu.shape, (n_plus_q, 1))
                 )
         if self.Sigma.shape != (n_plus_q, n_plus_q):
             raise AttributeError(
@@ -87,9 +105,9 @@ class ClosedSkewNormal:
     def _check_dims_z(self):
         n_z, q_z = self.n, self.q
 
-        if self.mu_z.shape != (n_z, ):
+        if self.mu_z.shape != (n_z, 1):
             raise AttributeError(
-                "Shape of mu_z {} is different of n {}".format(self.mu_z.shape, (n_z, ))
+                "Shape of mu_z {} is different of n {}".format(self.mu_z.shape, (n_z, 1))
                 )
         if self.Sigma_z.shape != (n_z, n_z):
             raise AttributeError(
@@ -99,9 +117,9 @@ class ClosedSkewNormal:
             raise AttributeError(
                 "Shape of Gamma_z_z {} is different of q x n {}".format(self.Gamma_z.shape, (q_z, n_z))
                 )
-        if self.nu_z.shape != (q_z, ):
+        if self.nu_z.shape != (q_z, 1):
             raise AttributeError(
-                "Shape of nu_z {} is different of q {}".format(self.nu_z.shape, (q_z, ))
+                "Shape of nu_z {} is different of q {}".format(self.nu_z.shape, (q_z, 1))
                 )
         if self.Delta_z.shape != (q_z, q_z):
             raise AttributeError(
@@ -109,15 +127,31 @@ class ClosedSkewNormal:
                 )
 
     def _check_dims_xy(self):
-        n_plus_q = self.n + self.q
+        n, q = self.n, self.q
         
-        if self.mu.shape != (n_plus_q, ):
+        if self.mu_x.shape != (n, 1):
             raise AttributeError(
-                "Shape of mu {} is different of n+q {}".format(self.mu.shape, (n_plus_q, ))
+                "Shape of mu {} is different of (n, 1) {}".format(self.mu_x.shape, (n, 1))
                 )
-        if self.Sigma.shape != (n_plus_q, n_plus_q):
+        if self.mu_y.shape != (q, 1):
             raise AttributeError(
-                "Shape of Sigma {} is different of n+q,n+q {}".format(self.Sigma.shape, (n_plus_q, n_plus_q))
+                "Shape of mu {} is different of (n, 1) {}".format(self.mu_y.shape, (q, 1))
+                )
+        if self.Sigma_x.shape != (n, n):
+            raise AttributeError(
+                "Shape of Sigma {} is different of n,n {}".format(self.Sigma_x.shape, (n, n))
+                )
+        if self.Sigma_y.shape != (q, q):
+            raise AttributeError(
+                "Shape of Sigma {} is different of n+q,n+q {}".format(self.Sigma.shape, (q, q))
+                )
+        if self.Gamma_xy.shape != (n, q):
+            raise AttributeError(
+                "Shape of Sigma {} is different of n+q,n+q {}".format(self.Sigma.shape, (n, q))
+                )
+        if self.Gamma_yx.shape != (q, n):
+            raise AttributeError(
+                "Shape of Sigma {} is different of n+q,n+q {}".format(self.Sigma.shape, (q, n))
                 )
 
     def _mvn2z(self):
@@ -132,10 +166,10 @@ class ClosedSkewNormal:
         Gamma_xy = Sigma[:n, n:]
         Gamma_yx = Sigma[n:, :n]
         
-        self.mu_z = np.atleast_1d(mu_x).flatten()
+        self.mu_z = np.atleast_1d(mu_x).reshape((n, 1))
         self.Sigma_z = np.atleast_2d(Sigma_x)
         self.Gamma_z = np.atleast_2d(np.matmul(Gamma_yx, np.linalg.inv(Sigma_x)))
-        self.nu_z = np.atleast_1d(-mu_y).flatten()
+        self.nu_z = np.atleast_1d(-mu_y).reshape((q, 1))
         self.Delta_z = np.atleast_2d(
             Sigma_y - np.matmul(
                 np.matmul(
@@ -144,18 +178,22 @@ class ClosedSkewNormal:
                 )
                 )
         
+        self._check_dims_z()
+        
     def _mvn2xy(self):
         mu = self.mu
         Sigma = self.Sigma
         n = self.n
         q = self.q
 
-        self.mu_x = mu[:n]
-        self.mu_y = mu[n:]
+        self.mu_x = np.atleast_1d(mu[:n]).reshape((n, 1))
+        self.mu_y = np.atleast_1d(mu[n:]).reshape((q, 1))
         self.Sigma_x = Sigma[:n, :n]
         self.Sigma_y = Sigma[n:, n:]
         self.Gamma_xy = Sigma[:n, n:]
         self.Gamma_yx = Sigma[n:, :n]
+
+        self._check_dims_xy()
     
     def _z2mvn(self):
         mu_z = self.mu_z
@@ -164,7 +202,7 @@ class ClosedSkewNormal:
         nu_z = self.nu_z
         Delta_z = self.Delta_z
     
-        self.mu = np.hstack([mu_z.flatten(),-nu_z.flatten()])
+        self.mu = np.vstack([mu_z,-nu_z])
 
         Sigma11 = Sigma_z
         Sigma12 = np.matmul(Sigma_z, Gamma_z.T)
@@ -175,6 +213,8 @@ class ClosedSkewNormal:
             [Sigma11, Sigma12],
             [Sigma21, Sigma22]
         ])
+
+        self._check_dims_mvn()
 
     def _z2xy(self):
         mu_z = self.mu_z
@@ -190,6 +230,8 @@ class ClosedSkewNormal:
         self.Gamma_xy = np.matmul(Sigma_z, Gamma_z.T)
         self.Gamma_yx = np.matmul(Gamma_z, Sigma_z)
 
+        self._check_dims_xy()
+
     def _xy2mvn(self):
         mu_x = self.mu_x
         mu_y = self.mu_y
@@ -199,7 +241,7 @@ class ClosedSkewNormal:
         Gamma_yx = self.Gamma_yx
 
         if self.q > 0:
-            self.mu = np.hstack([mu_x, mu_y])
+            self.mu = np.vstack([mu_x, mu_y])
             self.Sigma = np.block(
                 [
                     [Sigma_x, Gamma_xy],
@@ -209,6 +251,8 @@ class ClosedSkewNormal:
         elif self.q == 0:
             self.mu = mu_x
             self.Sigma = Sigma_x
+
+        self._check_dims_mvn()
     
     def pdf_mvn(self, pos):
         """
@@ -273,15 +317,15 @@ class ClosedSkewNormal:
         elif self.q > 1:
             term1 = multivariate_normal.cdf(
                 np.zeros(self.q), 
-                nu_z, 
+                nu_z.flatten(), 
                 Delta_z + np.matmul(
                     np.matmul(Gamma_z, Sigma_z), 
                     Gamma_z.T
                 )
             )
             term2 = multivariate_normal.cdf(
-                np.matmul(Gamma_z, np.atleast_2d(z - mu_z)).T,
-                nu_z, 
+                np.matmul(Gamma_z, (z.T - mu_z)).T,
+                nu_z.flatten(), 
                 Delta_z
             )
             term3 = multivariate_normal.pdf(z, mu_z, Sigma_z)
