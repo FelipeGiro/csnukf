@@ -292,7 +292,7 @@ class ClosedSkewNormal:
         
         return np.hstack(Y_arr)
 
-    def get_parameters(self, func_dim="multivariate_normal", output_type="tuple"):
+    def get_parameters(self, func_dim="mvn", output_type="tuple"):
 
         # check inputs
         if  not isinstance(func_dim, str):
@@ -301,7 +301,7 @@ class ClosedSkewNormal:
             raise TypeError("Parameter output_type must be a string. ({}, {})".format(type(output_type), output_type))
         
         # output selection
-        if func_dim.lower() == "multivariate_normal":
+        if (func_dim.lower() == "mvn") or (func_dim.lower() == "multivariate_normal"):
             if output_type.lower() == "tuple":
                 return self.mu, self.Sigma, self.n, self.q
             elif output_type.lower() == "dict":
