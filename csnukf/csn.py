@@ -495,7 +495,7 @@ class ClosedSkewNormal:
                 np.matmul(other.Sigma_z, other.Gamma_z.T)
             ]
         ).T*invSumSigma
-        nu = np.hstack([self.nu_z, other.nu_z])
+        nu = np.vstack([self.nu_z, other.nu_z])
 
         Delta_cross = block_diag(self.Delta_z, other.Delta_z)
         Gamma_cross = block_diag(self.Gamma_z, other.Gamma_z)
