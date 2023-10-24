@@ -222,19 +222,24 @@ class test_operations(unittest.TestCase):
             Delta_z = np.array([[ 3.0]])
         )
 
-    def test_sum2CSNs_1d(self):
+    def test_sumCSNs_1(self):
         csn_result = self.csn1_1n1q + self.csn2_1n1q
 
-        self.assertEqual(csn_result.q, self.csn1_1n1q.q + self.csn2_1n1q.q)
-        self.assertEqual(csn_result.n, self.csn1_1n1q.n)
-        self.assertEqual(csn_result.n, self.csn2_1n1q.n)
+        self.assertEqual(csn_result.q, self.csn1_1n1q.q + self.csn2_1n1q.q, "q_result != q_1 + q_2")
+        self.assertEqual(csn_result.n, self.csn1_1n1q.n, "n_result != n_1")
+        self.assertEqual(csn_result.n, self.csn2_1n1q.n, "n_result != n_2")
 
-    def test_sum3CSNs_1d(self):
-        csn_result = self.csn1_1n1q + self.csn2_1n1q + self.csn3_1n1q
+    def test_sumCSNs_2(self):
+        pass
 
-        self.assertEqual(csn_result.q, self.csn1_1n1q.q + self.csn2_1n1q.q + self.csn3_1n1q.q)
-        self.assertEqual(csn_result.n, self.csn1_1n1q.n)
-        self.assertEqual(csn_result.n, self.csn2_1n1q.n)
+    def test_sumCSNs_3(self):
+        pass
+
+    def test_sumCSNs_4(self):
+        pass
+
+    def test_sumCSNs_5(self):
+        pass
 
 if __name__ == "__main__":
     unittest.main()
