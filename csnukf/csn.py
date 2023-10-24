@@ -292,23 +292,55 @@ class ClosedSkewNormal:
         
         return np.hstack(Y_arr)
 
-    def get_bivariate_parameters(self):
-        # get mean and covatiance of underlying bi-variate normal
-        return self.mu, self.Sigma, self.n, self.q
-    
-    def get_distribution_parameters(self, type=None):
-        # get paramters of CSN distribution
-        if type is None:
-            return self.mu_z, self.Sigma_z, self.Gamma_z, self.nu_z, self.Delta_z
-        elif type == "dict":
-            return {
-                "mu_z" : self.mu_z, 
-                "Sigma_z" : self.Sigma_z, 
-                "Gamma_z" : self.Gamma_z, 
-                "nu_z" : self.nu_z, 
-                "Delta_z" : self.Delta_z
-            }
+    def get_parameters(self, func_dim="multivariate_normal", output_type="tuple"):
 
+        # check inputs
+        if  not isinstance(func_dim, str):
+            raise TypeError("Parameter func_dim must be a string. ({}, {})".format(type(func_dim), func_dim))
+        if not isinstance(output_type, str):
+            raise TypeError("Parameter output_type must be a string. ({}, {})".format(type(output_type), output_type))
+        
+        # output selection
+        if func_dim.lower() == "multivariate_normal":
+            if output_type.lower() == "tuple":
+                return self.mu, self.Sigma, self.n, self.q
+            elif output_type.lower() == "dict":
+                return {
+                    "mu" : self.mu, 
+                    "Sigma" : self.Sigma, 
+                    "n" : self.n,
+                    "q" : self.q
+                }
+            else:
+                raise ValueError("output_type ({}) must be tuple or dict".format(output_type))
+        elif func_dim.lower() == "xy":
+            if output_type.lower() == "tuple":
+                return self.mu_x, self.mu_y, self.Sigma_x, self.Sigma_y
+            elif output_type.lower() == "dict":
+                return {
+                    "mu_x" : self.mu_x, 
+                    "mu_y" : self.mu_y, 
+                    "Sigma_x" : self.Sigma_x, 
+                    "Sigma_y" : self.Sigma_y, 
+                }
+            else:
+                raise ValueError("output_type ({}) must be tuple or dict".format(output_type))
+        elif func_dim.lower() == "z":
+            if output_type.lower() == "tuple":
+                return self.mu_z, self.Sigma_z, self.Gamma_z, self.nu_z, self.Delta_z
+            elif output_type.lower() == "dict":
+                return {
+                    "mu_z" : self.mu_z, 
+                    "Sigma_z" : self.Sigma_z, 
+                    "Gamma_z" : self.Gamma_z, 
+                    "nu_z" : self.nu_z, 
+                    "Delta_z" : self.Delta_z
+                }
+            else:
+                raise ValueError("output_type ({}) must be tuple or dict".format(output_type))
+        else:
+            raise ValueError("func_dim ({}) must be multivariate_normal, xy, or z.".format(func_dim))
+        
     def __add__(self, other):
         
         if isinstance(other, ClosedSkewNormal):
