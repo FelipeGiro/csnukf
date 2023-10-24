@@ -460,7 +460,7 @@ class ClosedSkewNormal:
         ================
         """
         if self.n == len(other):
-            params_dict = self.get_distribution_parameters(type="dict")
+            params_dict = self.get_z_parameters(output_type="dict")
             params_dict["mu_z"] = params_dict["mu_z"] + other
             return ClosedSkewNormal(**params_dict)
         else:
@@ -528,16 +528,13 @@ class ClosedSkewNormal:
     def __sub__(self, other):
 
         if isinstance(other, ClosedSkewNormal):
-            mu_z, Sigma_z, Gamma_z, nu_z, Delta_z = other.get_distribution_parameters()
+            params = other.get_z_parameters(output_type="dict")
+
+            params["mu_z"] = -params["mu_z"]
+            params["Gamma_z"]  = -params["Gamma_z"]
 
             # recriate the class for negative random variable
-            other = ClosedSkewNormal(
-                mu_z = -mu_z, # negative here
-                nu_z = nu_z,
-                Sigma_z = Sigma_z,
-                Gamma_z = -Gamma_z, # negative here
-                Delta_z = Delta_z
-            )
+            other = ClosedSkewNormal(**params)
         else:
             other = -other 
 
