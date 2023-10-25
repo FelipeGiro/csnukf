@@ -33,11 +33,11 @@ class ClosedSkewNormal:
             ):
 
         # check variables availability
-        var_aval = [(mu is not None), (Sigma is not None), (n is not None), (q is not None)]
-        var_aval_z = [(mu_z is not None), (Sigma_z is not None), (Gamma_z is not None), (nu_z is not None), (Delta_z is not None)]
-        var_aval_xy = [(mu_x is not None), (mu_y is not None), (Sigma_x is not None), (Sigma_y is not None), (Gamma_xy is not None), (Gamma_yx is not None)]
+        var_aval = np.array([(mu is not None), (Sigma is not None), (n is not None), (q is not None)])
+        var_aval_z = np.array([(mu_z is not None), (Sigma_z is not None), (Gamma_z is not None), (nu_z is not None), (Delta_z is not None)])
+        var_aval_xy = np.array([(mu_x is not None), (mu_y is not None), (Sigma_x is not None), (Sigma_y is not None), (Gamma_xy is not None), (Gamma_yx is not None)])
 
-        if np.all(var_aval) & ~np.all(var_aval_z) & ~np.all(var_aval_xy):
+        if np.all(var_aval) & ~np.any(var_aval_z) & ~np.any(var_aval_xy):
             self.n = n
             self.q = q
             self.mu = np.atleast_1d(mu).reshape((n+q, 1))
@@ -48,7 +48,7 @@ class ClosedSkewNormal:
             self._mvn2z()
             self._mvn2xy()
             
-        elif ~np.all(var_aval) & np.all(var_aval_z) & ~np.all(var_aval_xy):
+        elif ~np.any(var_aval) & np.all(var_aval_z) & ~np.any(var_aval_xy):
 
             self.mu_z = np.atleast_1d(mu_z).flatten()
             self.Sigma_z = np.atleast_2d(Sigma_z)
@@ -67,7 +67,7 @@ class ClosedSkewNormal:
             self._z2mvn()
             self._z2xy()
 
-        elif ~np.all(var_aval) & ~np.all(var_aval_z) & np.all(var_aval_xy):
+        elif ~np.any(var_aval) & ~np.any(var_aval_z) & np.all(var_aval_xy):
 
             self.mu_x = np.atleast_1d(mu_x).flatten()
             self.mu_y = np.atleast_1d(mu_y).flatten()
@@ -87,10 +87,22 @@ class ClosedSkewNormal:
             self._xy2mvn()
             self._mvn2z()
 
-        else:
+        elif np.any(var_aval) + np.any(var_aval_z) + np.any(var_aval_xy) > 1:
             raise AttributeError(
-                "Input variables must from one type of distribution only."
+                "Inconsistent input parameters."
+                "The group of paramters should be one of the following:"
+                "\n- Multivariate normal: "
+                "n, q, mu, and Sigma."
+                "\n- Joint of Gaussian distribution of x and y: "
+                "mu_x, mu_y, Sigma_x, Sigma_y, Gamma_xy, and Gamma_yx"
+                "\n- Conditional distribution z = x|y: "
+                "mu_z, Sigma_z, Gamma_z, nu_z, and Delta_z."
                 )
+        
+        elif ~np.all(var_aval) & ~np.all(var_aval_z) & ~np.all(var_aval_xy):
+            raise AttributeError(
+                "Insufficient parameters to build ClosedSkewNormal object."
+            )
         
         
         self._check_dims_mvn()
@@ -525,8 +537,6 @@ class ClosedSkewNormal:
         Delta = Delta_cross + term1 - np.matmul(np.matmul(term2, term3), term4)
 
         result = ClosedSkewNormal(
-            n=n, 
-            q=q,
             mu_z = mu,
             nu_z = nu,
             Sigma_z = Sigma,
@@ -610,3 +620,22 @@ class ClosedSkewNormal:
                 arr2str(t + "Sigma", self.Sigma),
             ]
         )
+
+if __name__ == '__main__':
+    # csn1, csn2 = self.csn_2n1q_1, self.csn_2n1q_2
+
+    csn1 = ClosedSkewNormal(
+        mu_z = np.array([[0.0], [1.0]]),
+        Sigma_z = np.array([[ 1.0, .1], [.1, .8]]),
+        nu_z = np.array([[ 0.0]]),
+        Gamma_z = np.array([[ -2.0, -.5]]),
+        Delta_z = np.array([[ 3.0]])
+    )
+    csn2 = ClosedSkewNormal(
+        mu_z = np.array([[-5.0], [3.0]]),
+        Sigma_z = np.array([[ 2.0, -.1], [-.1, 1.8]]),
+        nu_z = np.array([[ 1.2]]),
+        Gamma_z = np.array([[ -2.0, .8]]),
+        Delta_z = np.array([[ .5]])
+    )
+    csn_result = csn1 + csn2
