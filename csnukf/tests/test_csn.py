@@ -190,7 +190,7 @@ class Test_CSN(unittest.TestCase):
 class test_operations(unittest.TestCase):
     def setUp(self) -> None:
         # closed skew normal obsjects
-        self.csn1_1n1q = ClosedSkewNormal(
+        self.csn_1n1q_1 = ClosedSkewNormal(
             mu_z = np.array([[ 0.0]]),
             nu_z = np.array([[ 5.0]]),
             Sigma_z = np.array([[ 8.0]]),
@@ -198,7 +198,7 @@ class test_operations(unittest.TestCase):
             Delta_z = np.array([[ 3.0]])
         )
 
-        self.csn2_1n1q = ClosedSkewNormal(
+        self.csn_1n1q_2 = ClosedSkewNormal(
             mu_z = np.array([[-1.8]]),
             nu_z = np.array([[0.5]]),
             Sigma_z = np.array([[ 1.5]]),
@@ -206,15 +206,15 @@ class test_operations(unittest.TestCase):
             Delta_z = np.array([[1.0]])
         )
 
-        self.csn3_1n1q = ClosedSkewNormal(
-            mu_z = np.array([[ 0.0]]),
-            nu_z = np.array([[ 0.0]]),
-            Sigma_z = np.array([[ 1.0]]),
-            Gamma_z = np.array([[ -2.0]]),
-            Delta_z = np.array([[ 3.0]])
+        self.csn_1n2q_1 = ClosedSkewNormal(
+            mu_z = np.array([[-1.8]]),
+            nu_z = np.array([[0.5, -3.]]),
+            Sigma_z = np.array([[ 1.5]]),
+            Gamma_z = np.array([[-2.0], [4.0]]),
+            Delta_z = np.array([[1.2, .4], [.4, 1.2]])
         )
 
-        self.csn4_2n1q = ClosedSkewNormal(
+        self.csn_2n1q_1 = ClosedSkewNormal(
             mu_z = np.array([[0.0], [1.0]]),
             Sigma_z = np.array([[ 1.0, .1], [.1, .8]]),
             nu_z = np.array([[ 0.0]]),
@@ -222,24 +222,77 @@ class test_operations(unittest.TestCase):
             Delta_z = np.array([[ 3.0]])
         )
 
-    def test_sumCSNs_1(self):
-        csn_result = self.csn1_1n1q + self.csn2_1n1q
+        self.csn_2n1q_2 = ClosedSkewNormal(
+            mu_z = np.array([[-5.0], [3.0]]),
+            Sigma_z = np.array([[ 2.0, -.1], [-.1, 1.8]]),
+            nu_z = np.array([[ 1.2]]),
+            Gamma_z = np.array([[ -2.0, .8]]),
+            Delta_z = np.array([[ .5]])
+        )
 
-        self.assertEqual(csn_result.q, self.csn1_1n1q.q + self.csn2_1n1q.q, "q_result != q_1 + q_2")
-        self.assertEqual(csn_result.n, self.csn1_1n1q.n, "n_result != n_1")
-        self.assertEqual(csn_result.n, self.csn2_1n1q.n, "n_result != n_2")
+    #########  SUM  #########
 
-    def test_sumCSNs_2(self):
-        pass
+    def test_sumCSN_1(self):
+        csn1, csn2 = self.csn_1n1q_1, self.csn_1n1q_2
+        csn_result = csn1 + csn2
 
-    def test_sumCSNs_3(self):
-        pass
+        self.assertEqual(csn_result.q, csn1.q + csn2.q, "q_result != q_1 + q_2")
+        self.assertEqual(csn_result.n, csn1.n, "n_result != n_1")
+        self.assertEqual(csn_result.n, csn2.n, "n_result != n_2")
 
-    def test_sumCSNs_4(self):
-        pass
+    def test_sumCSN_2(self):
+        csn1, csn2 = self.csn_1n1q_2, self.csn_1n2q_1
+        csn_result = csn1 + csn2
 
-    def test_sumCSNs_5(self):
-        pass
+        self.assertEqual(csn_result.q, csn1.q + csn2.q, "q_result != q_1 + q_2")
+        self.assertEqual(csn_result.n, csn1.n, "n_result != n_1")
+        self.assertEqual(csn_result.n, csn2.n, "n_result != n_2")
+
+    def test_sumCSN_3(self):
+        csn1, csn2 = self.csn_2n1q_1, self.csn_2n1q_2
+        csn_result = csn1 + csn2
+
+        self.assertEqual(csn_result.q, csn1.q + csn2.q, "q_result != q_1 + q_2")
+        self.assertEqual(csn_result.n, csn1.n, "n_result != n_1")
+        self.assertEqual(csn_result.n, csn2.n, "n_result != n_2")
+
+    #########  SUM  #########
+
+    def test_subtractionCSN_1(self):
+        csn1, csn2 = self.csn_1n1q_1, self.csn_1n1q_2
+        csn_result = csn1 - csn2
+
+        self.assertEqual(csn_result.q, csn1.q + csn2.q, "q_result != q_1 + q_2")
+        self.assertEqual(csn_result.n, csn1.n, "n_result != n_1")
+        self.assertEqual(csn_result.n, csn2.n, "n_result != n_2")
+
+    def test_subtractionCSN_2(self):
+        csn1, csn2 = self.csn_1n1q_2, self.csn_1n2q_1
+        csn_result = csn1 - csn2
+
+        self.assertEqual(csn_result.q, csn1.q + csn2.q, "q_result != q_1 + q_2")
+        self.assertEqual(csn_result.n, csn1.n, "n_result != n_1")
+        self.assertEqual(csn_result.n, csn2.n, "n_result != n_2")
+
+    def test_subtractionCSN_3(self):
+        csn1, csn2 = self.csn_2n1q_1, self.csn_2n1q_2
+        csn_result = csn1 - csn2
+
+        self.assertEqual(csn_result.q, csn1.q + csn2.q, "q_result != q_1 + q_2")
+        self.assertEqual(csn_result.n, csn1.n, "n_result != n_1")
+        self.assertEqual(csn_result.n, csn2.n, "n_result != n_2")
+
+    #########  MULTIPLICATION  #########
+
+    # def test_multiplication_CSN_with_constant_1(self):
+    #     csn, cte = self.csn_1n1q_1, np.pi
+    #     csn_times_pi = csn*cte
+    #     csn_plus_csn = csn + csn + csn
+
+    #     print(csn_times_pi)
+    #     print(csn_plus_csn)
+
+    #     self.assertTrue(csn_times_pi == csn_plus_csn )
 
 if __name__ == "__main__":
     unittest.main()
