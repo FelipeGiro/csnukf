@@ -230,6 +230,23 @@ class test_operations(unittest.TestCase):
             Delta_z = np.array([[ .5]])
         )
 
+    #########  EQUAL  #########
+    def test_equal_to_iself(self):
+
+        # True
+        msg = "CSN object not equal to itself."
+        self.assertTrue(self.csn_1n1q_1 == self.csn_1n1q_1, msg)
+        self.assertTrue(self.csn_1n1q_2 == self.csn_1n1q_2, msg)
+        self.assertTrue(self.csn_1n2q_1 == self.csn_1n2q_1, msg)
+        self.assertTrue(self.csn_2n1q_1 == self.csn_2n1q_1, msg)
+        self.assertTrue(self.csn_2n1q_2 == self.csn_2n1q_2, msg)
+
+        # False
+        msg = "Different CSN objects are equal."
+        self.assertFalse(self.csn_1n1q_1 == self.csn_1n1q_2, msg)
+
+
+
     #########  SUM  #########
 
     def test_sumCSN_1(self):
@@ -291,8 +308,6 @@ class test_operations(unittest.TestCase):
 
     #     print(csn_times_pi)
     #     print(csn_plus_csn)
-
-    #     self.assertTrue(csn_times_pi == csn_plus_csn )
 
 if __name__ == "__main__":
     unittest.main()
