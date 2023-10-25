@@ -4,6 +4,18 @@ from scipy.stats import norm, multivariate_normal
 
 from scipy.optimize import minimize
 
+def arr2str(label, arr):
+    prefix = f"{label} = "
+    if 0 in arr.shape:
+        prefix += "empty("
+        suffix = ")"
+        mid = str(arr.shape)
+    else:
+        suffix = ""
+        mid = np.array2string(arr, separator='   ', prefix=prefix, suffix=suffix)
+        
+    return prefix + mid + suffix
+
 class ClosedSkewNormal:
     """
     Closed Skewed Normal
@@ -84,7 +96,6 @@ class ClosedSkewNormal:
         self._check_dims_mvn()
         self._check_dims_xy()
         self._check_dims_z()
-    
     
         self._check_dims_mvn()
         self._check_dims_xy()
@@ -575,19 +586,31 @@ class ClosedSkewNormal:
 
         return equal
 
-    def __str__(self):
-        text = 'Closed Skewed Normal\n====================\n'
-        text += f'  n, q:\n({self.n}, {self.q})\n'
-        text += 'Bivariate parameters:\n'
-        text += f'  mu:\n{self.mu}\n'
-        text += f'  Sigma:\n{self.Sigma}\n'
-        text += 'Distribution parameters:\n'
-        text += f'  mu_z:\n{self.mu_z}\n'
-        text += f'  Sigma_z:\n{self.Sigma_z}\n'
-        text += f'  Gamma_z:\n{self.Gamma_z}\n'
-        text += f'  nu_z:\n{self.nu_z}\n'
-        text += f'  Delta_z:\n{self.Delta_z}\n'
-        return text
+    def __repr__(self):
+        t = "   "
+        return "\n".join(
+            [
+                f'Closed skew normal object, defined as:',
+                '=> conditional distribution z = x|y',
+                arr2str(t + "mu_z", self.mu_z.flatten()),
+                arr2str(t + "nu_z", self.nu_z.flatten()),
+                arr2str(t + "Sigma_z", self.Sigma_z),
+                arr2str(t + "Gamma_z", self.Gamma_z),
+                arr2str(t + "Delta_z", self.Delta_z),
+                "=> two jointly Gaussian random variables",
+                arr2str(t + "mu_x", self.mu_x.flatten()),
+                arr2str(t + "mu_y", self.mu_y.flatten()),
+                arr2str(t + "Sigma_x", self.Sigma_x),
+                arr2str(t + "Sigma_y", self.Sigma_y),
+                arr2str(t + "Gamma_xy", self.Gamma_xy.T) + ".T",
+                arr2str(t + "Gamma_yx", self.Gamma_yx),
+                "=> as Gaussian random variable",
+                t + f"n = {self.n}, q = {self.q}",
+                arr2str(t + "mu", self.mu.flatten()),
+                arr2str(t + "Sigma", self.Sigma),
+            ]
+        )
+
 
 if __name__ == "__main__":
 
