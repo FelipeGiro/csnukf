@@ -104,14 +104,10 @@ class ClosedSkewNormal:
                 "Insufficient parameters to build ClosedSkewNormal object."
             )
         
-        
         self._check_dims_mvn()
         self._check_dims_xy()
         self._check_dims_z()
     
-        self._check_dims_mvn()
-        self._check_dims_xy()
-        self._check_dims_z()
     
     def _check_dims_mvn(self):
         n_plus_q = self.n + self.q
@@ -622,20 +618,12 @@ class ClosedSkewNormal:
         )
 
 if __name__ == '__main__':
-    # csn1, csn2 = self.csn_2n1q_1, self.csn_2n1q_2
 
-    csn1 = ClosedSkewNormal(
-        mu_z = np.array([[0.0], [1.0]]),
-        Sigma_z = np.array([[ 1.0, .1], [.1, .8]]),
-        nu_z = np.array([[ 0.0]]),
-        Gamma_z = np.array([[ -2.0, -.5]]),
-        Delta_z = np.array([[ 3.0]])
-    )
     csn2 = ClosedSkewNormal(
-        mu_z = np.array([[-5.0], [3.0]]),
-        Sigma_z = np.array([[ 2.0, -.1], [-.1, 1.8]]),
-        nu_z = np.array([[ 1.2]]),
-        Gamma_z = np.array([[ -2.0, .8]]),
-        Delta_z = np.array([[ .5]])
+        mu = np.array([[-5.0], [3.0]]),
+        Sigma = np.array([[ 2.0, -.1], [-.1, 1.8]]),
+        n=0,
+        q=2
     )
-    csn_result = csn1 + csn2
+
+    print(csn2)
