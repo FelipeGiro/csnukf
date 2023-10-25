@@ -570,21 +570,21 @@ class ClosedSkewNormal:
         if not isinstance(other, ClosedSkewNormal):
             raise TypeError("Variable must be a csnukf.csn.ClosedSkewNormal object")
         
+        if (self.n != other.n) or (self.q != other.q):
+            return False
+         
         params_csn1_dict = self.get_all_parameters()
-        params_csn2_dict = self.get_all_parameters()
+        params_csn2_dict = other.get_all_parameters()
 
         key_list = np.array(list(params_csn1_dict.keys()))
 
-        var_equal_list = list()
+        var_equal_arr = list()
         for key in key_list:
-            var_equal_list.append(np.ravel(params_csn1_dict[key] == params_csn2_dict[key]))
+            _isclose = np.isclose(params_csn1_dict[key], params_csn2_dict[key])
+            var_equal_arr.append(np.all(_isclose.flatten()))
+        var_equal_arr = np.hstack(var_equal_arr)
 
-        equal = np.all(np.hstack(var_equal_list))
-
-        if ~equal:
-            print("Unequal variables:", key_list[~var_equal_list])
-
-        return equal
+        return np.all(var_equal_arr)
 
     def __repr__(self):
         t = "   "
@@ -610,33 +610,3 @@ class ClosedSkewNormal:
                 arr2str(t + "Sigma", self.Sigma),
             ]
         )
-
-
-if __name__ == "__main__":
-
-    params_ref = {
-            "mu" : np.array([[ 3.0], [1.2], [9]]),
-            "Sigma" : np.array(
-                [
-                    [ 2.0, 5.5, .9],
-                    [ 5.5, 6, 1.1],
-                    [ .9, 1.1, 4.6]
-                    ]
-                ),
-            "n" : 2,
-            "q" : 1
-        }
-    csn_obj = ClosedSkewNormal(**params_ref)
-
-    params_mvn = csn_obj.get_parameters("mvn", "dict")
-    params_xy = csn_obj.get_parameters("xy", "dict")
-    params_z = csn_obj.get_parameters("z", "dict")
-
-    csn_from_mvn = ClosedSkewNormal(**params_mvn)
-    csn_from_xy = ClosedSkewNormal(**params_xy)
-    csn_from_z = ClosedSkewNormal(**params_z)
-
-
-
-
-    
