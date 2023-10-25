@@ -187,6 +187,58 @@ class Test_CSN(unittest.TestCase):
         self.assertTrue(csn_from_xy == csn_from_xy, "CSN(xy) != CSN(xy)")
         self.assertTrue(csn_from_z == csn_from_z, "CSN(z) != CSN(z)")
 
+class Test_CSN_errors(unittest.TestCase):
+    def test_insuficient_paramters(self):
+        with self.assertRaises(AttributeError):
+            ClosedSkewNormal(
+                mu_z = np.array([[ 3.0, 4.0]]),
+                Delta_z = np.array(
+                    [
+                        [ 3.0, -1],
+                        [ -1, 9]
+                    ]
+                )
+            
+            )
+
+    def test_inconsistent_paramters_mvn(self):
+        with self.assertRaises(AttributeError):
+            ClosedSkewNormal(
+                mu = np.array([[ 3.0, 4.0]]),
+                Sigma = np.array(
+                    [
+                        [ 3.0, -1],
+                        [ -1, 9]
+                    ]
+                ),
+                n = 1,
+                q = 1,
+                mu_z = np.array(([[3.0]]))
+            )
+
+    def test_inconsistent_paramters_xy(self):
+        with self.assertRaises(AttributeError):
+            ClosedSkewNormal(
+                mu_x = np.eye(1),
+                Sigma_x = np.eye(1),
+                mu_y = np.eye(1),
+                Sigma_y = np.eye(1),
+                Gamma_xy = np.eye(1),
+                Gamma_yx = np.eye(1),
+                mu = np.ones(2)
+            )
+
+    def test_inconsistent_paramters_z(self):
+        with self.assertRaises(AttributeError):
+            ClosedSkewNormal(
+                mu_z = np.array([[-1.8]]),
+                nu_z = np.array([[0.5]]),
+                Sigma_z = np.array([[ 1.5]]),
+                Gamma_z = np.array([[-2.0]]),
+                Delta_z = np.array([[1.0]]),
+                q = 0,
+            )
+
 class test_operations(unittest.TestCase):
     def setUp(self) -> None:
         # closed skew normal obsjects
