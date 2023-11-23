@@ -21,9 +21,73 @@ class ClosedSkewNormal:
     Closed Skewed Normal
     ====================
     
+    Closed skew normal definition according to [1].
+
     Input the bivariate normal parameters (mu and Sigma) OR directly the the parameters of the distribution
     (mu_z, Sigma_z, Gamma_z, nu_z, Delta_z).
+
+    Methods
+    -------
+    pdf_mvn(pos)
+        Probability density function as a multivariate normal (same as
+        a multivariate normal of mean and covariance `mu` and `Sigma`)
+        with `n+q` dimensions.
+    pdf_z(z)
+        Probability density function `z=x|y` with `n` dimensions.
+    pdf(x)
+        same as pdf_z.
+    rvs(size)
+        Draw random samples from a multivariate normal of closed skew
+        normal objected.
+    get_mvn_parameters(output_type="tuple")
+        Get `mu` and `Sigma`.
+    get_xy_parameters(output_type="tuple")
+        Get `mu_x`, `mu_y`, `Sigma_x`, `Sigma_y`, `Gamma_xy`, and `Gamma_yx`.
+    get_z_parameters(output_type="tuple")
+        Get `mu_z`, `Sigma_z`, `Gamma_z`, `nu_z`, and `Delta_z`.
+    get_all_parameters()
+        Get all parameters.
+    get_parameters()
+        Get the chosen parameters.
+
+    Parameters
+    ----------
+    As a multivariate normal form
+    mu : array_like
+    Sigma : array_like
+    n : int
+    q : int
+    As `z=x|y`
+    mu_z : array_like
+    Sigma_z : array_like
+    mu_z : array_like
+    Sigma_z : array_like
+    Gamma_z : array_like
+    nu_z : array_like
+    Delta_z : array_like
+    As `(x, y)`
+    mu_x : array_like
+    mu_y : array_like
+    Sigma_x : array_like
+    Sigma_y : array_like
+    Gamma_xy : array_like
+    Gamma_yx : array_like
+
+    Notes
+    -----
+    Closed skew normal objects support operation of addiction (`+`), 
+    subtraction (`-`), multiplication (`*`), and division (`/`) with 
+    ther objects and constants. See reference [2].
     
+    References
+    ----------
+    .. [1] Javad Rezaie & Jo Eidsvik (2016) A skewed unscented Kalman filter, 
+           International Journal of Control, 89:12, 2572-2583, 
+           DOI: 10.1080/00207179.2016.1171912
+    .. [2] Graciela Gonzalez-Farias; Armando Dominguez-Molina, Arjun K. Guptac; 2004. 
+               Additive properties of skew normal random vectors
+               https://doi.org/10.1016/j.jspi.2003.09.008
+
     """
     def __init__(
             self, 
@@ -37,6 +101,7 @@ class ClosedSkewNormal:
         var_aval_z = np.array([(mu_z is not None), (Sigma_z is not None), (Gamma_z is not None), (nu_z is not None), (Delta_z is not None)])
         var_aval_xy = np.array([(mu_x is not None), (mu_y is not None), (Sigma_x is not None), (Sigma_y is not None), (Gamma_xy is not None), (Gamma_yx is not None)])
 
+        # multivariate normal form
         if np.all(var_aval) & ~np.any(var_aval_z) & ~np.any(var_aval_xy):
             self.n = n
             self.q = q
@@ -47,7 +112,8 @@ class ClosedSkewNormal:
 
             self._mvn2z()
             self._mvn2xy()
-            
+        
+        # z = x|y form
         elif ~np.any(var_aval) & np.all(var_aval_z) & ~np.any(var_aval_xy):
 
             self.mu_z = np.atleast_1d(mu_z).flatten()
@@ -67,6 +133,7 @@ class ClosedSkewNormal:
             self._z2mvn()
             self._z2xy()
 
+        # x, y form
         elif ~np.any(var_aval) & ~np.any(var_aval_z) & np.all(var_aval_xy):
 
             self.mu_x = np.atleast_1d(mu_x).flatten()
@@ -87,6 +154,7 @@ class ClosedSkewNormal:
             self._xy2mvn()
             self._mvn2z()
 
+        # error if mixed variables
         elif np.any(var_aval) + np.any(var_aval_z) + np.any(var_aval_xy) > 1:
             raise AttributeError(
                 "Inconsistent input parameters."
@@ -99,6 +167,7 @@ class ClosedSkewNormal:
                 "mu_z, Sigma_z, Gamma_z, nu_z, and Delta_z."
                 )
         
+        # error if inssuficcient variables
         elif ~np.all(var_aval) & ~np.all(var_aval_z) & ~np.all(var_aval_xy):
             raise AttributeError(
                 "Insufficient parameters to build ClosedSkewNormal object."
@@ -107,7 +176,6 @@ class ClosedSkewNormal:
         self._check_dims_mvn()
         self._check_dims_xy()
         self._check_dims_z()
-    
     
     def _check_dims_mvn(self):
         n_plus_q = self.n + self.q
@@ -174,6 +242,7 @@ class ClosedSkewNormal:
                 )
 
     def _mvn2z(self):
+        # conversion from multivariate normal to z=x|y form
         mu = self.mu
         Sigma = self.Sigma
         n, q = self.n, self.q
@@ -200,6 +269,7 @@ class ClosedSkewNormal:
         self._check_dims_z()
         
     def _mvn2xy(self):
+        # conversion from multivariate norma (x,y) form
         mu = self.mu
         Sigma = self.Sigma
         n = self.n
@@ -215,6 +285,7 @@ class ClosedSkewNormal:
         self._check_dims_xy()
     
     def _z2mvn(self):
+        # conversion from z=x|y to multivariate normal form.
         mu_z = self.mu_z
         Sigma_z = self.Sigma_z
         Gamma_z = self.Gamma_z
@@ -236,6 +307,7 @@ class ClosedSkewNormal:
         self._check_dims_mvn()
 
     def _z2xy(self):
+        # conversion from z=x|y to (x,y) form.
         mu_z = self.mu_z
         Sigma_z = self.Sigma_z
         Gamma_z = self.Gamma_z
@@ -252,6 +324,7 @@ class ClosedSkewNormal:
         self._check_dims_xy()
 
     def _xy2mvn(self):
+        # conversion from (x,y) to multivariate normal form.
         mu_x = self.mu_x
         mu_y = self.mu_y
         Sigma_x = self.Sigma_x
@@ -275,19 +348,17 @@ class ClosedSkewNormal:
     
     def pdf_mvn(self, pos):
         """
-        Get PDF of bivariate normal
-        ===========================
-        
-        Get the underlying bi-variate normal of the CSN distribution.
+        Get the underlying multivariate normal of the CSN distribution.
         Similar to scipy.multivariate_normal.pdf.
         
         Parameters:
         -----------
-        pos : array
-        
+        pos : array_like
+            TODO: doc
         Return
-        pdf : array
-        
+        ------
+        pdf : array_like
+            Probability density function.
         """
         
         nu = self.mu
@@ -299,16 +370,17 @@ class ClosedSkewNormal:
     
     def pdf_z(self, z):
         """
-        Get PDF in z space
-        ==================
+        Get the clsoed skew normal distribution as `z=x|y`.
+        Similar to scipy.multivariate_normal.pdf.
         
-        Parameters:
-        -----------
-        z : array
+        Parameters
+        ----------
+        z : array_like
         
         Return
-        pdf : array
-        
+        ------
+        pdf : array_like
+            Probability density function.
         """
         
         mu_z = self.mu_z.flatten()
@@ -360,14 +432,33 @@ class ClosedSkewNormal:
         
     
     def pdf(self, x):
+        """
+        Get the clsoed skew normal distribution as `z=x|y`.
+        Similar to scipy.multivariate_normal.pdf. Same as `pdf_z`
+        
+        Parameters
+        ----------
+        z : array_like
+        
+        Return
+        ------
+        pdf : array_like
+            Probability density function.
+        """
         return self.pdf_z(x)
 
     def rvs(self, size):
         """
-        Random variable sampling
-        ========================
+        Sampling of `z=x|y`.
 
-        Attention! Working only for 1D distributions in z
+        Note
+        ----
+        Working only for 1D distributions in z.
+        Use acceptance-rejection method for sampling [1].
+        
+        Reference
+        ---------
+        .. [1] http://www.columbia.edu/~ks20/4703-Sigman/4703-07-Notes-ARM.pdf
         """
         G =  multivariate_normal(self.mu_z, self.Sigma_z)
 
@@ -410,7 +501,7 @@ class ClosedSkewNormal:
 
     def get_xy_parameters(self, output_type="tuple"):
         if output_type.lower() == "tuple":
-            return self.mu_x, self.mu_y, self.Sigma_x, self.Sigma_y
+            return self.mu_x, self.mu_y, self.Sigma_x, self.Sigma_y, self.Gamma_xy, self.Gamma_yx
         elif output_type.lower() == "dict":
             return {
                 "mu_x" : self.mu_x, 
@@ -479,10 +570,6 @@ class ClosedSkewNormal:
         return result
         
     def _add_cte(self, other):
-        """
-        Add a array-like
-        ================
-        """
         if self.n == len(other):
             params_dict = self.get_z_parameters(output_type="dict")
             params_dict["mu_z"] = params_dict["mu_z"] + other
@@ -492,13 +579,13 @@ class ClosedSkewNormal:
         
     def _add_CSN(self, other):
         """
-        Add a CSN
-        =========
+        Summation of two `ClosedSkewNormal` objects [1].
 
-        Source:
-            Graciela Gonzalez-Farias; Armando Dominguez-Molina, Arjun K. Guptac; 2004. 
-            Additive properties of skew normal random vectors
-            https://doi.org/10.1016/j.jspi.2003.09.008
+        Source
+        ------
+        .. [1] Graciela Gonzalez-Farias; Armando Dominguez-Molina, Arjun K. Guptac; 2004. 
+               Additive properties of skew normal random vectors
+               https://doi.org/10.1016/j.jspi.2003.09.008
         """
 
         if self.n != other.n:
@@ -548,6 +635,15 @@ class ClosedSkewNormal:
         return result
     
     def __sub__(self, other):
+        """Summation with other `ClosedSkewNormal` object [1]. Same as
+        adding with netative `mu_z` and `Gamma_z`
+
+        Source
+        ------
+        .. [1] Graciela Gonzalez-Farias; Armando Dominguez-Molina, Arjun K. Guptac; 2004. 
+               Additive properties of skew normal random vectors
+               https://doi.org/10.1016/j.jspi.2003.09.008
+        """
 
         if isinstance(other, ClosedSkewNormal):
             params = other.get_z_parameters(output_type="dict")
@@ -563,6 +659,12 @@ class ClosedSkewNormal:
         return self + other
     
     def __mul__(self, other):
+        """Multiplication with a `ClosedSkewNormal` object or constant.
+        
+        Note
+        ----
+        Not available yet for other CSN objects.
+        """
         if isinstance(other, ClosedSkewNormal):
             raise ArithmeticError("Multiplication of CSNs not available yet.")
         else:
@@ -574,10 +676,17 @@ class ClosedSkewNormal:
             )
         
     def __truediv__(self, other):
+        """Division with a `ClosedSkewNormal` object or constant.
+        
+        Note
+        ----
+        Not available yet for other CSN objects.
+        """
         other = 1/other
         return self*other
     
     def __eq__(self, other):
+        """Compare the the class paramters with another object."""
         if not isinstance(other, ClosedSkewNormal):
             raise TypeError("Variable must be a csnukf.csn.ClosedSkewNormal object")
         
