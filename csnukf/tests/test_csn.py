@@ -117,10 +117,10 @@ class Test_CSN(unittest.TestCase):
             "mu" : np.array([[ 3.0], [1.2], [9]]),
             "Sigma" : np.array(
                 [
-                    [ 2.0, 5.5, .9],
-                    [ 5.5, 6, 1.1],
+                    [ 4.0, 2.1, .9],
+                    [ 2.1, 6, 1.1],
                     [ .9, 1.1, 4.6]
-                    ]
+                ]
                 ),
             "n" : 2,
             "q" : 1
@@ -143,6 +143,11 @@ class Test_CSN(unittest.TestCase):
         self.assertTrue(csn_from_mvn == csn_from_mvn, "CSN(mvn) != CSN(mvn)")
         self.assertTrue(csn_from_xy == csn_from_xy, "CSN(xy) != CSN(xy)")
         self.assertTrue(csn_from_z == csn_from_z, "CSN(z) != CSN(z)")
+
+        z = np.repeat(self.z, repeats=csn_obj.n, axis=0).T
+        self.assertListEqual(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
+        self.assertListEqual(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
+        self.assertListEqual(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
     
     def test_csn_n2q2(self):
 
