@@ -157,15 +157,15 @@ class Test_CSN(unittest.TestCase):
             "mu_z" : np.array([[ 3.0, 4.0]]),
             "Sigma_z" : np.array(
                 [
-                    [ 2.0, 5.5],
+                    [ 8, 5.5],
                     [ 5.5, 6]
                     ]
                 ),
             "nu_z" : np.array([[ -3.0, 4.0]]),
             "Gamma_z" : np.array(
                 [
-                    [ 4.0, 2.2],
-                    [ 2.2, 3]
+                    [ 4.0, 1.2],
+                    [ 1.2, 3]
                     ]
                 ),
             "Delta_z" : np.array(
@@ -175,6 +175,9 @@ class Test_CSN(unittest.TestCase):
                     ]
                 ),
         }
+
+        x, y = np.mgrid[-100:100:1, -100:100:1]
+        z = np.dstack((x, y))
 
         csn_obj = ClosedSkewNormal(**params_ref)
 
@@ -193,6 +196,10 @@ class Test_CSN(unittest.TestCase):
         self.assertTrue(csn_from_mvn == csn_from_mvn, "CSN(mvn) != CSN(mvn)")
         self.assertTrue(csn_from_xy == csn_from_xy, "CSN(xy) != CSN(xy)")
         self.assertTrue(csn_from_z == csn_from_z, "CSN(z) != CSN(z)")
+
+        self.assertListEqual(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
+        self.assertListEqual(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
+        self.assertListEqual(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
 
 class Test_CSN_errors(unittest.TestCase):
     def test_insuficient_paramters(self):
