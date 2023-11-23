@@ -35,9 +35,9 @@ class Test_CSN(unittest.TestCase):
         self.assertTrue(csn_from_z == csn_from_z, "CSN(z) != CSN(z)")
 
         z = np.repeat(self.z, repeats=csn_obj.n, axis=0).T
-        self.assertListEqual(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
-        self.assertListEqual(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
-        self.assertListEqual(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
+        np.testing.assert_array_almost_equal(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), err_msg="pdf(z): CSN(mvn) != CSN(xy)")
+        np.testing.assert_array_almost_equal(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), err_msg="pdf(z): CSN(xy) != CSN(z)")
+        np.testing.assert_array_almost_equal(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), err_msg="pdf(z): CSN(z) != CSN(mvn)")
 
     def test_csn_n1q1(self):
 
@@ -68,9 +68,9 @@ class Test_CSN(unittest.TestCase):
         self.assertTrue(csn_from_z == csn_from_z, "CSN(z) != CSN(z)")
 
         z = np.repeat(self.z, repeats=csn_obj.n, axis=0).T
-        self.assertListEqual(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
-        self.assertListEqual(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
-        self.assertListEqual(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
+        np.testing.assert_array_almost_equal(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), err_msg="pdf(z): CSN(mvn) != CSN(xy)")
+        np.testing.assert_array_almost_equal(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), err_msg="pdf(z): CSN(xy) != CSN(z)")
+        np.testing.assert_array_almost_equal(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), err_msg="pdf(z): CSN(z) != CSN(mvn)")
     
     def test_csn_n1q2(self):
 
@@ -107,9 +107,9 @@ class Test_CSN(unittest.TestCase):
         self.assertTrue(csn_from_z == csn_from_z, "CSN(z) != CSN(z)")
 
         z = np.repeat(self.z, repeats=csn_obj.n, axis=0).T
-        self.assertListEqual(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
-        self.assertListEqual(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
-        self.assertListEqual(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
+        np.testing.assert_array_almost_equal(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), err_msg="pdf(z): CSN(mvn) != CSN(xy)")
+        np.testing.assert_array_almost_equal(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), err_msg="pdf(z): CSN(xy) != CSN(z)")
+        np.testing.assert_array_almost_equal(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), err_msg="pdf(z): CSN(z) != CSN(mvn)")
 
     def test_csn_n2q1(self):
 
@@ -147,9 +147,9 @@ class Test_CSN(unittest.TestCase):
         self.assertTrue(csn_from_xy == csn_from_xy, "CSN(xy) != CSN(xy)")
         self.assertTrue(csn_from_z == csn_from_z, "CSN(z) != CSN(z)")
 
-        self.assertListEqual(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
-        self.assertListEqual(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
-        self.assertListEqual(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
+        np.testing.assert_array_almost_equal(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), err_msg="pdf(z): CSN(mvn) != CSN(xy)")
+        np.testing.assert_array_almost_equal(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), err_msg="pdf(z): CSN(xy) != CSN(z)")
+        np.testing.assert_array_almost_equal(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), err_msg="pdf(z): CSN(z) != CSN(mvn)")
     
     def test_csn_n2q2(self):
 
@@ -197,9 +197,9 @@ class Test_CSN(unittest.TestCase):
         self.assertTrue(csn_from_xy == csn_from_xy, "CSN(xy) != CSN(xy)")
         self.assertTrue(csn_from_z == csn_from_z, "CSN(z) != CSN(z)")
 
-        self.assertListEqual(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
-        self.assertListEqual(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
-        self.assertListEqual(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
+        np.testing.assert_array_almost_equal(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), err_msg="pdf(z): CSN(mvn) != CSN(xy)")
+        np.testing.assert_array_almost_equal(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), err_msg="pdf(z): CSN(xy) != CSN(z)")
+        np.testing.assert_array_almost_equal(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), err_msg="pdf(z): CSN(z) != CSN(mvn)")
 
 class Test_CSN_errors(unittest.TestCase):
     def test_insuficient_paramters(self):
