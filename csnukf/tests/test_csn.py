@@ -201,6 +201,45 @@ class Test_CSN(unittest.TestCase):
         np.testing.assert_array_almost_equal(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), err_msg="pdf(z): CSN(xy) != CSN(z)")
         np.testing.assert_array_almost_equal(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), err_msg="pdf(z): CSN(z) != CSN(mvn)")
 
+    def test_csn_n1q2(self):
+
+        params_ref = {
+            "mu" : np.array([[ 3.0], [1.2], [9]]),
+            "Sigma" : np.array(
+                [
+                    [ 4.0, 2.1, .9],
+                    [ 2.1, 6, 1.1],
+                    [ .9, 1.1, 4.6]
+                ]
+                ),
+            "n" : 1,
+            "q" : 2
+        }
+
+        z = np.linspace(-100,100,201)
+
+        csn_obj = ClosedSkewNormal(**params_ref)
+
+        params_mvn = csn_obj.get_parameters("mvn", "dict")
+        params_xy = csn_obj.get_parameters("xy", "dict")
+        params_z = csn_obj.get_parameters("z", "dict")
+
+        csn_from_mvn = ClosedSkewNormal(**params_mvn)
+        csn_from_xy = ClosedSkewNormal(**params_xy)
+        csn_from_z = ClosedSkewNormal(**params_z)
+
+        self.assertTrue(csn_from_mvn == csn_from_xy, "CSN(mvn) != CSN(xy)")
+        self.assertTrue(csn_from_xy == csn_from_z, "CSN(xy) != CSN(z)")
+        self.assertTrue(csn_from_z == csn_from_mvn, "CSN(z) != CSN(mvn)")
+
+        self.assertTrue(csn_from_mvn == csn_from_mvn, "CSN(mvn) != CSN(mvn)")
+        self.assertTrue(csn_from_xy == csn_from_xy, "CSN(xy) != CSN(xy)")
+        self.assertTrue(csn_from_z == csn_from_z, "CSN(z) != CSN(z)")
+
+        np.testing.assert_array_almost_equal(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), err_msg="pdf(z): CSN(mvn) != CSN(xy)")
+        np.testing.assert_array_almost_equal(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), err_msg="pdf(z): CSN(xy) != CSN(z)")
+        np.testing.assert_array_almost_equal(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), err_msg="pdf(z): CSN(z) != CSN(mvn)")
+
 class Test_CSN_errors(unittest.TestCase):
     def test_insuficient_paramters(self):
         with self.assertRaises(AttributeError):
