@@ -337,8 +337,8 @@ class ClosedSkewNormal:
             return term1**(-1)*term2*term3
 
         elif self.q >= 1: # and any self.n
-            
-            # z = np.atleast_2d(z)
+            if self.n == 1:
+                z = np.atleast_2d(z).T
 
             term1 = multivariate_normal.cdf(
                 np.zeros(self.q), 
@@ -623,35 +623,4 @@ class ClosedSkewNormal:
         )
 
 if __name__ == '__main__':
-
-    params_ref = {
-        "mu_z" : np.array([[ 3.0, 4.0]]),
-        "Sigma_z" : np.array(
-            [
-                [ 8, 5.5],
-                [ 5.5, 6]
-                ]
-            ),
-        "nu_z" : np.array([[ -3.0, 4.0]]),
-        "Gamma_z" : np.array(
-            [
-                [ 4.0, 1.2],
-                [ 1.2, 3]
-                ]
-            ),
-        "Delta_z" : np.array(
-            [
-                [ 3.0, -1],
-                [ -1, 9]
-                ]
-            ),
-    }
-
-    x, y = np.mgrid[-100:100:1, -100:100:1]
-    z = np.dstack((x, y))
-
-    csn_obj = ClosedSkewNormal(**params_ref)
-
-    csn_pdf = csn_obj.pdf(z)
-
-    print()
+    pass
