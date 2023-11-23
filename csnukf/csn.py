@@ -311,10 +311,10 @@ class ClosedSkewNormal:
         
         """
         
-        mu_z = self.mu_z
+        mu_z = self.mu_z.flatten()
         Sigma_z = self.Sigma_z
         Gamma_z = self.Gamma_z
-        nu_z = self.nu_z
+        nu_z = self.nu_z.flatten()
         Delta_z = self.Delta_z
         
         # for 1-dimensional CSN
@@ -622,12 +622,32 @@ class ClosedSkewNormal:
 
 if __name__ == '__main__':
 
-    csn = ClosedSkewNormal(
-        mu = np.array([[-5.0]]),
-        Sigma = np.array([[ 10]]),
-        n=1,
-        q=0
-    )
+    params_ref = {
+        "mu" : np.array([[ 3.0], [1.2], [9]]),
+        "Sigma" : np.array(
+            [
+                [ 4.0, 2.1, .9],
+                [ 2.1, 6, 1.1],
+                [ .9, 1.1, 4.6]
+            ]
+            ),
+        "n" : 2,
+        "q" : 1
+    }
 
-    print(csn*3)
-    print(csn + csn + csn)
+    csn_obj = ClosedSkewNormal(**params_ref)
+
+    x, y = np.mgrid[-100:100:1, -100:100:1]
+    z = np.dstack((x, y))
+
+    params_mvn = csn_obj.get_parameters("mvn", "dict")
+    params_xy = csn_obj.get_parameters("xy", "dict")
+    params_z = csn_obj.get_parameters("z", "dict")
+
+    csn_from_mvn = ClosedSkewNormal(**params_mvn)
+    csn_from_xy = ClosedSkewNormal(**params_xy)
+    csn_from_z = ClosedSkewNormal(**params_z)
+
+    csn_from_mvn.pdf(z)
+
+    print()
