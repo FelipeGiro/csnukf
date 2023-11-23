@@ -336,7 +336,7 @@ class ClosedSkewNormal:
 
             return term1**(-1)*term2*term3
 
-        elif self.q > 1:
+        elif self.q >= 1: # and any self.n
             
             # z = np.atleast_2d(z)
 
@@ -349,7 +349,7 @@ class ClosedSkewNormal:
                 )
             )
             term2 = multivariate_normal.cdf(
-                np.matmul((z - mu_z), Gamma_z), # np.matmul(Gamma_z, (z - mu_z)).T,
+                np.matmul((z - mu_z), Gamma_z.T), # np.matmul(Gamma_z, (z - mu_z)).T,
                 nu_z.flatten(), 
                 Delta_z
             )
