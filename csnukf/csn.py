@@ -317,10 +317,13 @@ class ClosedSkewNormal:
         nu_z = self.nu_z.flatten()
         Delta_z = self.Delta_z
         
-        # for 1-dimensional CSN
-        # usefull for fitting
+        # if no skewness parameters, therefore q=q_z=0, it behaves like as normal distribution
+        if (self.q == 0):
+            return multivariate_normal.pdf(z, mu_z, Sigma_z)
+        
+        # for 1-dimensional CSN (usefull for fitting)
         # scipy.stats.norm performance is significantly superior than scipy.stats.multivariate_normal
-        if (self.n == 1) & (self.q == 1): 
+        elif (self.n == 1) & (self.q == 1):
             mu_z = float(self.mu_z)
             Sigma_z = float(self.Sigma_z)
             Gamma_z = float(self.Gamma_z)
@@ -335,7 +338,7 @@ class ClosedSkewNormal:
 
         elif self.q > 1:
             
-            z = np.atleast_2d(z)
+            # z = np.atleast_2d(z)
 
             term1 = multivariate_normal.cdf(
                 np.zeros(self.q), 
@@ -346,7 +349,7 @@ class ClosedSkewNormal:
                 )
             )
             term2 = multivariate_normal.cdf(
-                np.matmul(Gamma_z, (z.T - mu_z)).T,
+                np.matmul((z - mu_z), Gamma_z), # np.matmul(Gamma_z, (z - mu_z)).T,
                 nu_z.flatten(), 
                 Delta_z
             )
@@ -354,8 +357,7 @@ class ClosedSkewNormal:
 
             return (term1**(-1)*term2*term3).flatten()
         
-        else:
-            return multivariate_normal.pdf(z, mu_z, Sigma_z)
+        
     
     def pdf(self, x):
         return self.pdf_z(x)
@@ -623,31 +625,33 @@ class ClosedSkewNormal:
 if __name__ == '__main__':
 
     params_ref = {
-        "mu" : np.array([[ 3.0], [1.2], [9]]),
-        "Sigma" : np.array(
+        "mu_z" : np.array([[ 3.0, 4.0]]),
+        "Sigma_z" : np.array(
             [
-                [ 4.0, 2.1, .9],
-                [ 2.1, 6, 1.1],
-                [ .9, 1.1, 4.6]
-            ]
+                [ 2.0, 5.5],
+                [ 5.5, 6]
+                ]
             ),
-        "n" : 2,
-        "q" : 1
+        "nu_z" : np.array([[ -3.0, 4.0]]),
+        "Gamma_z" : np.array(
+            [
+                [ 4.0, 2.2],
+                [ 2.2, 3]
+                ]
+            ),
+        "Delta_z" : np.array(
+            [
+                [ 3.0, -1],
+                [ -1, 9]
+                ]
+            ),
     }
-
-    csn_obj = ClosedSkewNormal(**params_ref)
 
     x, y = np.mgrid[-100:100:1, -100:100:1]
     z = np.dstack((x, y))
 
-    params_mvn = csn_obj.get_parameters("mvn", "dict")
-    params_xy = csn_obj.get_parameters("xy", "dict")
-    params_z = csn_obj.get_parameters("z", "dict")
+    csn_obj = ClosedSkewNormal(**params_ref)
 
-    csn_from_mvn = ClosedSkewNormal(**params_mvn)
-    csn_from_xy = ClosedSkewNormal(**params_xy)
-    csn_from_z = ClosedSkewNormal(**params_z)
-
-    csn_from_mvn.pdf(z)
+    csn_pdf = csn_obj.pdf(z)
 
     print()
