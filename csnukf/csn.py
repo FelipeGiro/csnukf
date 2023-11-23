@@ -334,6 +334,9 @@ class ClosedSkewNormal:
             return term1**(-1)*term2*term3
 
         elif self.q > 1:
+            
+            z = np.atleast_2d(z)
+
             term1 = multivariate_normal.cdf(
                 np.zeros(self.q), 
                 nu_z.flatten(), 
@@ -619,11 +622,12 @@ class ClosedSkewNormal:
 
 if __name__ == '__main__':
 
-    csn2 = ClosedSkewNormal(
-        mu = np.array([[-5.0], [3.0]]),
-        Sigma = np.array([[ 2.0, -.1], [-.1, 1.8]]),
-        n=0,
-        q=2
+    csn = ClosedSkewNormal(
+        mu = np.array([[-5.0]]),
+        Sigma = np.array([[ 10]]),
+        n=1,
+        q=0
     )
 
-    print(csn2)
+    print(csn*3)
+    print(csn + csn + csn)
