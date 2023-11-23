@@ -126,6 +126,9 @@ class Test_CSN(unittest.TestCase):
             "q" : 1
         }
 
+        x, y = np.mgrid[-100:100:1, -100:100:1]
+        z = np.dstack((x, y))
+
         csn_obj = ClosedSkewNormal(**params_ref)
 
         params_mvn = csn_obj.get_parameters("mvn", "dict")
@@ -144,7 +147,6 @@ class Test_CSN(unittest.TestCase):
         self.assertTrue(csn_from_xy == csn_from_xy, "CSN(xy) != CSN(xy)")
         self.assertTrue(csn_from_z == csn_from_z, "CSN(z) != CSN(z)")
 
-        z = np.repeat(self.z, repeats=csn_obj.n, axis=0).T
         self.assertListEqual(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
         self.assertListEqual(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
         self.assertListEqual(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), "pdf(z): CSN(mvn) != CSN(xy)")
