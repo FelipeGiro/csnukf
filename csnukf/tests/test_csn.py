@@ -369,25 +369,72 @@ class test_operations(unittest.TestCase):
         csn1, csn2 = self.csn_1n1q_1, self.csn_1n1q_2
         csn_result = csn1 + csn2
 
+        mu_ref = np.array([-1.8, -5., -0.5])
+        Sigma_ref =  np.array(
+            [
+                [  9.5,  40. ,  -3. ],
+                [ 40. , 203. ,   0. ],
+                [ -3. ,   0. ,   7. ]
+            ]
+        )
+
+        # assert dimensions
         self.assertEqual(csn_result.q, csn1.q + csn2.q, "q_result != q_1 + q_2")
         self.assertEqual(csn_result.n, csn1.n, "n_result != n_1")
         self.assertEqual(csn_result.n, csn2.n, "n_result != n_2")
+
+        # assert mu and Sigma
+        # print(csn_result.get_mvn_parameters())
+        np.testing.assert_almost_equal(mu_ref, csn_result.mu.flatten(), err_msg="Parameter mu is wrong.")
+        np.testing.assert_almost_equal(Sigma_ref, csn_result.Sigma, err_msg="Parameter Sigma is wrong.")
 
     def test_sumCSN_2(self):
         csn1, csn2 = self.csn_1n1q_2, self.csn_1n2q_1
         csn_result = csn1 + csn2
 
+        mu_ref = np.array([-3.6, -0.5, -0.5, 3. ])
+        Sigma_ref = np.array(
+            [
+                [  3. ,  -3. ,  -3. ,   6. ],
+                [ -3. ,   7. ,   0. ,   0. ],
+                [ -3. ,   0. ,   7.2, -11.6],
+                [  6. ,   0. , -11.6,  25.2]
+            ]
+        )
+
+        # assert dimensions
         self.assertEqual(csn_result.q, csn1.q + csn2.q, "q_result != q_1 + q_2")
         self.assertEqual(csn_result.n, csn1.n, "n_result != n_1")
         self.assertEqual(csn_result.n, csn2.n, "n_result != n_2")
+
+        # assert mu and Sigma
+        # print(csn_result.get_mvn_parameters())
+        np.testing.assert_almost_equal(mu_ref, csn_result.mu.flatten(), err_msg="Parameter mu is wrong.")
+        np.testing.assert_almost_equal(Sigma_ref, csn_result.Sigma, err_msg="Parameter Sigma is wrong.")
 
     def test_sumCSN_3(self):
         csn1, csn2 = self.csn_2n1q_1, self.csn_2n1q_2
         csn_result = csn1 + csn2
 
+        mu_ref = np.array([-5.,4.,-0.,-1.2])
+        Sigma_ref = np.array(
+            [
+                [ 3.        ,  0.        , -2.05      ,  0.        ],
+                [ 0.        ,  2.6       ,  0.        ,  1.64      ],
+                [-2.05      ,  0.        ,  7.26153846, -2.40953846],
+                [ 0.        ,  1.64      , -2.40953846,  4.4232    ]
+            ]
+        )
+
+        # assert dimensions
         self.assertEqual(csn_result.q, csn1.q + csn2.q, "q_result != q_1 + q_2")
         self.assertEqual(csn_result.n, csn1.n, "n_result != n_1")
         self.assertEqual(csn_result.n, csn2.n, "n_result != n_2")
+
+        # assert mu and Sigma
+        # print(csn_result.get_mvn_parameters())
+        np.testing.assert_almost_equal(mu_ref, csn_result.mu.flatten(), err_msg="Parameter mu is wrong.")
+        np.testing.assert_almost_equal(Sigma_ref, csn_result.Sigma, err_msg="Parameter Sigma is wrong.")
 
     #########  SUBTRACTION  #########
 
@@ -395,25 +442,72 @@ class test_operations(unittest.TestCase):
         csn1, csn2 = self.csn_1n1q_1, self.csn_1n1q_2
         csn_result = csn1 - csn2
 
+        mu_ref = np.array([ 1.8, -5., -0.5])
+        Sigma_ref = np.array(
+            [
+                [  9.5,  40. ,   3. ],
+                [ 40. , 203. ,   0. ],
+                [  3. ,   0. ,   7. ]
+            ]
+        )
+
+        # assert dimensions
         self.assertEqual(csn_result.q, csn1.q + csn2.q, "q_result != q_1 + q_2")
         self.assertEqual(csn_result.n, csn1.n, "n_result != n_1")
         self.assertEqual(csn_result.n, csn2.n, "n_result != n_2")
+
+        # assert mu and Sigma
+        # print(csn_result.get_mvn_parameters())
+        np.testing.assert_almost_equal(mu_ref, csn_result.mu.flatten(), err_msg="Parameter mu is wrong.")
+        np.testing.assert_almost_equal(Sigma_ref, csn_result.Sigma, err_msg="Parameter Sigma is wrong.")
 
     def test_subtractionCSN_2(self):
         csn1, csn2 = self.csn_1n1q_2, self.csn_1n2q_1
         csn_result = csn1 - csn2
 
+        mu_ref = np.array([ 0.,-0.5,-0.5,3. ])
+        Sigma_ref = np.array(
+            [
+                [  3. ,  -3. ,   3. ,  -6. ],
+                [ -3. ,   7. ,   0. ,   0. ],
+                [  3. ,   0. ,   7.2, -11.6],
+                [ -6. ,   0. , -11.6,  25.2]
+            ]
+        )
+
+        # assert dimensions
         self.assertEqual(csn_result.q, csn1.q + csn2.q, "q_result != q_1 + q_2")
         self.assertEqual(csn_result.n, csn1.n, "n_result != n_1")
         self.assertEqual(csn_result.n, csn2.n, "n_result != n_2")
+
+        # assert mu and Sigma
+        # print(csn_result.get_mvn_parameters())
+        np.testing.assert_almost_equal(mu_ref, csn_result.mu.flatten(), err_msg="Parameter mu is wrong.")
+        np.testing.assert_almost_equal(Sigma_ref, csn_result.Sigma, err_msg="Parameter Sigma is wrong.")
 
     def test_subtractionCSN_3(self):
         csn1, csn2 = self.csn_2n1q_1, self.csn_2n1q_2
         csn_result = csn1 - csn2
 
+        mu_ref = np.array([ 5., -2., -0., -1.2])
+        Sigma_ref = np.array(
+            [
+                [ 3.        ,  0.        , -2.05      ,  0.        ],
+                [ 0.        ,  2.6       ,  0.        , -1.64      ],
+                [-2.05      ,  0.        ,  7.26153846,  2.40953846],
+                [ 0.        , -1.64      ,  2.40953846,  4.4232    ]
+            ]
+        )
+
+        # assert dimensions
         self.assertEqual(csn_result.q, csn1.q + csn2.q, "q_result != q_1 + q_2")
         self.assertEqual(csn_result.n, csn1.n, "n_result != n_1")
         self.assertEqual(csn_result.n, csn2.n, "n_result != n_2")
+
+        # assert mu and Sigma
+        # print(csn_result.get_mvn_parameters())
+        np.testing.assert_almost_equal(mu_ref, csn_result.mu.flatten(), err_msg="Parameter mu is wrong.")
+        np.testing.assert_almost_equal(Sigma_ref, csn_result.Sigma, err_msg="Parameter Sigma is wrong.")
 
     # TODO: #########  MULTIPLICATION  #########
 
