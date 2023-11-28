@@ -348,6 +348,7 @@ class test_operations(unittest.TestCase):
         )
 
     #########  EQUAL  #########
+
     def test_equal_to_iself(self):
 
         # True
@@ -361,8 +362,6 @@ class test_operations(unittest.TestCase):
         # False
         msg = "Different CSN objects are equal."
         self.assertFalse(self.csn_1n1q_1 == self.csn_1n1q_2, msg)
-
-
 
     #########  SUM  #########
 
@@ -390,7 +389,7 @@ class test_operations(unittest.TestCase):
         self.assertEqual(csn_result.n, csn1.n, "n_result != n_1")
         self.assertEqual(csn_result.n, csn2.n, "n_result != n_2")
 
-    #########  SUM  #########
+    #########  SUBTRACTION  #########
 
     def test_subtractionCSN_1(self):
         csn1, csn2 = self.csn_1n1q_1, self.csn_1n1q_2
