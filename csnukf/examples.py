@@ -39,6 +39,16 @@ def get_csn_parameters():
 
     return parameters_list
 
+def get_all_example_pdf(x):
+    csn_param_list = get_csn_parameters()
+
+    pdf_list = list()
+    for params_dict in csn_param_list:
+        csn = ClosedSkewNormal(**params_dict)
+        pdf_list.append(csn.pdf_z(x))
+    
+    return np.vstack(pdf_list)
+
 def plot_effect_of_csn_parameters():
     csn_param_list = get_csn_parameters()
     ax_i_list = np.append(np.repeat([0,1,2,3,4], 3), [5])
@@ -77,4 +87,4 @@ if __name__ == "__main__":
 
     fig, axes = plot_effect_of_csn_parameters()
 
-    print()
+    print(get_all_example_pdf(x=np.arange(-3,4)))
