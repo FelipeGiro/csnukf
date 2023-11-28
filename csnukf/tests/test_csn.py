@@ -2,6 +2,7 @@ import unittest
 
 import numpy as np
 from csnukf import ClosedSkewNormal
+from csnukf.examples import get_all_example_pdf
 
 from scipy.stats import multivariate_normal
 
@@ -147,9 +148,9 @@ class Test_CSN(unittest.TestCase):
         self.assertTrue(csn_from_xy == csn_from_xy, "CSN(xy) != CSN(xy)")
         self.assertTrue(csn_from_z == csn_from_z, "CSN(z) != CSN(z)")
 
-        np.testing.assert_array_almost_equal(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), err_msg="pdf(z): CSN(mvn) != CSN(xy)")
-        np.testing.assert_array_almost_equal(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), err_msg="pdf(z): CSN(xy) != CSN(z)")
-        np.testing.assert_array_almost_equal(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), err_msg="pdf(z): CSN(z) != CSN(mvn)")
+        np.testing.assert_array_equal(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), err_msg="pdf(z): CSN(mvn) != CSN(xy)")
+        np.testing.assert_array_equal(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), err_msg="pdf(z): CSN(xy) != CSN(z)")
+        np.testing.assert_array_equal(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), err_msg="pdf(z): CSN(z) != CSN(mvn)")
 
 
         # TODO test random variables sampling
@@ -566,6 +567,34 @@ class test_CSN_1D_sampling(unittest.TestCase):
             samples = self.csn_3.rvs(5)
 
         np.testing.assert_array_almost_equal(ref_samples, samples, err_msg="Wrong sampling from CSN.")
+
+class test_examples(unittest.TestCase):
+    def test_Rezaie_parameters_effect(self):
+        # Figure 2: effect of CSN distribution parameters (Rezaie & Eidsvik, 2016) 
+        pdfs_ref_arr = np.array(
+            [
+                [6.53271609e-04, 3.98942280e-01, 4.83288177e-01, 1.07981933e-01, 8.86369682e-03, 2.67660452e-04, 2.97343903e-06], #  0 : (a) lower
+                [1.00034655e-21, 1.06533641e-10, 6.53271609e-04, 3.98942280e-01, 4.83288177e-01, 1.07981933e-01, 8.86369682e-03], #  1 : (a) middle
+                [1.09153942e-56, 4.75494004e-37, 1.00034655e-21, 1.06533641e-10, 6.53271609e-04, 3.98942280e-01, 4.83288177e-01], #  2 : (a) upper
+                [7.70166857e-15, 2.32187994e-06, 5.21279744e-02, 5.29382100e-01, 3.28561193e-01, 7.33119325e-02, 6.01780988e-03], #  3 : (b) lower
+                [1.00034655e-21, 1.06533641e-10, 6.53271609e-04, 3.98942280e-01, 4.83288177e-01, 1.07981933e-01, 8.86369682e-03], #  4 : (b) middle
+                [3.21302455e-30, 1.27445464e-16, 2.63186121e-07, 3.44381503e-02, 7.72471816e-01, 2.04858118e-01, 1.68163109e-02], #  5 : (b) upper
+                [1.57159380e-23, 2.03897924e-11, 5.60352794e-04, 5.64189584e-01, 4.14547145e-01, 2.06669853e-02, 1.39253052e-04], #  6 : (c) lower
+                [1.00034655e-21, 1.06533641e-10, 6.53271609e-04, 3.98942280e-01, 4.83288177e-01, 1.07981933e-01, 8.86369682e-03], #  7 : (c) middle
+                [6.71116728e-21, 2.04769964e-10, 5.93133437e-04, 2.82094792e-01, 4.38798156e-01, 2.07553749e-01, 5.94651446e-02], #  8 : (c) upper
+                [8.86369682e-03, 1.07981933e-01, 4.83288177e-01, 3.98942280e-01, 6.53271609e-04, 1.06533641e-10, 1.00034655e-21], #  9 : (d) lower
+                [1.00034655e-21, 1.06533641e-10, 6.53271609e-04, 3.98942280e-01, 4.83288177e-01, 1.07981933e-01, 8.86369682e-03], # 10 : (d) middle
+                [4.43184841e-03, 5.39909665e-02, 2.41970725e-01, 3.98942280e-01, 2.41970725e-01, 5.39909665e-02, 4.43184841e-03], # 11 : (d) upper
+                [1.83346976e-39, 1.16187138e-18, 5.34525356e-06, 3.98942280e-01, 4.83936104e-01, 1.07981933e-01, 8.86369682e-03], # 12 : (e) lower
+                [1.00034655e-21, 1.06533641e-10, 6.53271609e-04, 3.98942280e-01, 4.83288177e-01, 1.07981933e-01, 8.86369682e-03], # 13 : (e) middle
+                [8.71372503e-13, 1.19268728e-06, 8.20156226e-03, 3.98942280e-01, 4.75739887e-01, 1.07980740e-01, 8.86369682e-03], # 14 : (e) upper
+                [1.19489084e-04, 1.86912375e-03, 1.77337524e-02, 1.02050699e-01, 3.56097191e-01, 5.41525918e-01, 1.01283330e-02] # 15 : (f) all
+            ]
+        )
+        pdfs_arr = get_all_example_pdf(x=np.arange(-3,4))
+
+        for pdf_ref, pdf, plot_id in zip(pdfs_ref_arr, pdfs_arr, np.arange(16)):
+            np.testing.assert_array_almost_equal(pdf_ref, pdf, err_msg=f"Difference at axis id {plot_id}")
 
 if __name__ == "__main__":
     unittest.main()
