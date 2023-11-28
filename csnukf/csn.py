@@ -40,7 +40,7 @@ class ClosedSkewNormal:
         Draw random samples from a multivariate normal of closed skew
         normal objected.
     get_mvn_parameters(output_type="tuple")
-        Get `mu` and `Sigma`.
+        Get `mu`, `Sigma`, `n`, and `q`.
     get_xy_parameters(output_type="tuple")
         Get `mu_x`, `mu_y`, `Sigma_x`, `Sigma_y`, `Gamma_xy`, and `Gamma_yx`.
     get_z_parameters(output_type="tuple")
