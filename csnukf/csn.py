@@ -465,7 +465,7 @@ class ClosedSkewNormal:
         f = self.pdf_z
         g = G.pdf
         minus_f_div_g = lambda x : -(f(x)/g(x))
-        c = np.abs(minimize(minus_f_div_g, self.mu_z, method="Powell").x)
+        c = np.abs(minimize(minus_f_div_g, self.mu_z.flatten(), method="Powell").x)
 
         # acceptance-rejection method 
         # (see http://www.columbia.edu/~ks20/4703-Sigman/4703-07-Notes-ARM.pdf)
