@@ -39,11 +39,6 @@ class Test_CSN(unittest.TestCase):
         np.testing.assert_array_almost_equal(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), err_msg="pdf(z): CSN(xy) != CSN(z)")
         np.testing.assert_array_almost_equal(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), err_msg="pdf(z): CSN(z) != CSN(mvn)")
 
-        # TODO test random variables sampling
-        # samples = [insert right values here]
-        np.random.seed(1822091822)
-        # np.testing.assert_array_almost_equal(csn_obj.rvs(10), samples, err_msg="Error in random variable sampling")
-
     def test_csn_n1q1(self):
 
         params_ref = {
@@ -76,11 +71,6 @@ class Test_CSN(unittest.TestCase):
         np.testing.assert_array_almost_equal(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), err_msg="pdf(z): CSN(mvn) != CSN(xy)")
         np.testing.assert_array_almost_equal(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), err_msg="pdf(z): CSN(xy) != CSN(z)")
         np.testing.assert_array_almost_equal(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), err_msg="pdf(z): CSN(z) != CSN(mvn)")
-
-        # TODO test random variables sampling
-        # samples = [insert right values here]
-        np.random.seed(19891115)
-        # np.testing.assert_array_almost_equal(csn_obj.rvs(10), samples, err_msg="Error in random variable sampling")
 
     def test_csn_n1q2(self):
 
@@ -120,11 +110,6 @@ class Test_CSN(unittest.TestCase):
         np.testing.assert_array_almost_equal(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), err_msg="pdf(z): CSN(mvn) != CSN(xy)")
         np.testing.assert_array_almost_equal(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), err_msg="pdf(z): CSN(xy) != CSN(z)")
         np.testing.assert_array_almost_equal(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), err_msg="pdf(z): CSN(z) != CSN(mvn)")
-
-        # TODO test random variables sampling
-        # samples = [insert right values here]
-        np.random.seed(19880513)
-        # np.testing.assert_array_almost_equal(csn_obj.rvs(10), samples, err_msg="Error in random variable sampling")
 
     def test_csn_n2q1(self):
 
@@ -166,6 +151,13 @@ class Test_CSN(unittest.TestCase):
         np.testing.assert_array_almost_equal(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), err_msg="pdf(z): CSN(xy) != CSN(z)")
         np.testing.assert_array_almost_equal(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), err_msg="pdf(z): CSN(z) != CSN(mvn)")
 
+
+        # TODO test random variables sampling
+        # samples = [insert right values here]
+        np.random.seed(15000422)
+        # np.testing.assert_array_almost_equal(csn_obj.rvs(10), samples, err_msg="Error in random variable sampling")
+    
+    
         # TODO test random variables sampling
         # samples = [insert right values here]
         np.random.seed(15000422)
@@ -221,11 +213,6 @@ class Test_CSN(unittest.TestCase):
         np.testing.assert_array_almost_equal(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), err_msg="pdf(z): CSN(xy) != CSN(z)")
         np.testing.assert_array_almost_equal(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), err_msg="pdf(z): CSN(z) != CSN(mvn)")
 
-        # TODO test random variables sampling
-        # samples = [insert right values here]
-        np.random.seed(20221030)
-        # np.testing.assert_array_almost_equal(csn_obj.rvs(10), samples, err_msg="Error in random variable sampling")
-
     def test_csn_n1q2(self):
 
         params_ref = {
@@ -264,11 +251,6 @@ class Test_CSN(unittest.TestCase):
         np.testing.assert_array_almost_equal(csn_from_mvn.pdf(z).tolist(), csn_from_xy.pdf(z).tolist(), err_msg="pdf(z): CSN(mvn) != CSN(xy)")
         np.testing.assert_array_almost_equal(csn_from_xy.pdf(z).tolist(), csn_from_z.pdf(z).tolist(), err_msg="pdf(z): CSN(xy) != CSN(z)")
         np.testing.assert_array_almost_equal(csn_from_z.pdf(z).tolist(), csn_from_mvn.pdf(z).tolist(), err_msg="pdf(z): CSN(z) != CSN(mvn)")
-
-        # TODO test random variables sampling
-        # samples = [insert right values here]
-        np.random.seed(17920421)
-        # np.testing.assert_array_almost_equal(csn_obj.rvs(10), samples, err_msg="Error in random variable sampling")
 
 class Test_CSN_errors(unittest.TestCase):
     def test_insuficient_paramters(self):
@@ -434,7 +416,7 @@ class test_operations(unittest.TestCase):
         self.assertEqual(csn_result.n, csn1.n, "n_result != n_1")
         self.assertEqual(csn_result.n, csn2.n, "n_result != n_2")
 
-    #########  MULTIPLICATION  #########
+    # TODO: #########  MULTIPLICATION  #########
 
     # def test_multiplication_CSN_with_constant_1(self):
     #     csn, cte = self.csn_1n1q_1, np.pi
@@ -443,6 +425,54 @@ class test_operations(unittest.TestCase):
 
     #     print(csn_times_pi)
     #     print(csn_plus_csn)
+
+class test_CSN_1D_sampling(unittest.TestCase):
+    def setUp(self):
+        self.csn_1 = ClosedSkewNormal(
+            mu_z = np.array([[ 0.0]]),
+            nu_z = np.array([[ 5.0]]),
+            Sigma_z = np.array([[ 8.0]]),
+            Gamma_z = np.array([[ 5.0]]),
+            Delta_z = np.array([[ 3.0]])
+        )
+        self.csn_2 = ClosedSkewNormal(
+            mu_z = np.array([[-1.8]]),
+            nu_z = np.array([[0.5]]),
+            Sigma_z = np.array([[ 1.5]]),
+            Gamma_z = np.array([[-2.0]]),
+            Delta_z = np.array([[1.0]])
+        )
+        self.csn_3 = ClosedSkewNormal(
+            mu_z = np.array([[ 0.0]]),
+            nu_z = np.array([[ 0.0]]),
+            Sigma_z = np.array([[ 1.0]]),
+            Gamma_z = np.array([[ -2.0]]),
+            Delta_z = np.array([[ 3.0]])
+        )
+
+    def test_csn1_1D_rvs(self):
+        ref_samples = [1.29217214, 1.57001725, 0.76932106, 1.89847131, 1.72734761]
+        np.random.seed(15000422)
+        with np.errstate(invalid='ignore'): # sometimes, g(x)=0
+            samples = self.csn_1.rvs(5)
+        
+        np.testing.assert_array_almost_equal(ref_samples, samples, err_msg="Wrong sampling from CSN.")
+
+    def test_csn2_1D_rvs(self):
+        ref_samples = [-2.55132361, -1.81362587, -4.27915516, -1.62783108, -3.08272455]
+        np.random.seed(18220907)
+        with np.errstate(invalid='ignore'): # sometimes, g(x)=0
+            samples = self.csn_2.rvs(5)
+
+        np.testing.assert_array_almost_equal(ref_samples, samples, err_msg="Wrong sampling from CSN.")
+
+    def test_csn3_1D_rvs(self):
+        ref_samples = [-1.22783799, -0.19801904, -2.21566253, 0.17347386, -1.34880619]
+        np.random.seed(18891115)
+        with np.errstate(invalid='ignore'): # sometimes, g(x)=0
+            samples = self.csn_3.rvs(5)
+
+        np.testing.assert_array_almost_equal(ref_samples, samples, err_msg="Wrong sampling from CSN.")
 
 if __name__ == "__main__":
     unittest.main()
